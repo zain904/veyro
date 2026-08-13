@@ -1,6 +1,13 @@
 .login-page {
   display: flex;
   min-height: 100vh;
+  flex-direction: column;
+}
+
+.login-body {
+  display: flex;
+  flex: 1;
+  min-height: 0;
 }
 
 .login-left {
@@ -237,4 +244,11 @@
 
 .back-btn {
   width: 100%;
+}
+
+.login-footer {
+  flex-shrink: 0;
+  width: 100%;
+  background: var(--bg-color);
+  border-top: 1px solid var(--border-color);
 }

@@ -4,6 +4,8 @@
 
 A polished personal finance manager built with Angular 19 and Supabase. Track income, expenses, budgets, and savings — all in one place.
 
+**Author:** [Zain Ul Abdeen](mailto:zulabdeen86@gmail.com) · **Live:** [veyro-red.vercel.app](https://veyro-red.vercel.app)
+
 ![Tech Stack](https://img.shields.io/badge/Angular-19-red?style=flat-square)
 ![Supabase](https://img.shields.io/badge/Supabase-Backend-green?style=flat-square)
 ![Material](https://img.shields.io/badge/Material-UI-blue?style=flat-square)
@@ -114,4 +116,6 @@ All tables use Row Level Security (RLS) so users only see their own data.
 
 ## License
 
-MIT
+MIT — Copyright © 2026 **Zain Ul Abdeen** ([zulabdeen86@gmail.com](mailto:zulabdeen86@gmail.com)). All rights reserved.
+
+See [LICENSE](LICENSE) for full terms.

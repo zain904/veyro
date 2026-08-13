@@ -11,6 +11,7 @@ import { AuthService } from '../../core/services/auth.service';
 import { ThemeService } from '../../core/services/theme.service';
 import { DataRefreshService } from '../../core/services/data-refresh.service';
 import { Profile } from '../../core/models/transaction.model';
+import { APP_AUTHOR, appCopyright } from '../../core/constants/app.constants';
 import { AsyncPipe } from '@angular/common';
 
 @Component({
@@ -35,6 +36,9 @@ export class SettingsComponent implements OnInit {
   profile = signal<Profile | null>(null);
   fullName = '';
   message = signal<string | null>(null);
+  author = APP_AUTHOR;
+  copyright = appCopyright();
+  copyrightYear = new Date().getFullYear();
 
   ngOnInit(): void {
     this.loadProfile();

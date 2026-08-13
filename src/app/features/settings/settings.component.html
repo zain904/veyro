@@ -64,6 +64,19 @@
           Sign out
         </button>
       </mat-card>
+
+      <mat-card class="panel-card">
+        <div class="panel-header">
+          <h3>About Veyro</h3>
+          <span class="hint">App information</span>
+        </div>
+        <p class="about-text">Know where your money goes.</p>
+        <p class="about-meta">
+          {{ copyright }}<br>
+          <strong>{{ author.name }}</strong><br>
+          <a [href]="'mailto:' + author.email">{{ author.email }}</a>
+        </p>
+      </mat-card>
     </div>
   }
 </div>

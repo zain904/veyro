@@ -9,6 +9,8 @@
     "test": "ng test"
   },
   "private": true,
+  "author": "Zain Ul Abdeen <zulabdeen86@gmail.com>",
+  "license": "MIT",
   "dependencies": {
     "@angular/animations": "^19.2.25",
     "@angular/cdk": "^19.2.19",

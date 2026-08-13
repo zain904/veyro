@@ -16,6 +16,7 @@ import { ProfileService } from '../../../core/services/profile.service';
 import { DataRefreshService } from '../../../core/services/data-refresh.service';
 import { DatabaseService } from '../../../core/services/database.service';
 import { AsyncPipe } from '@angular/common';
+import { AppFooterComponent } from '../footer/app-footer.component';
 
 const SIDEBAR_COLLAPSED_KEY = 'veyro-sidebar-collapsed';
 
@@ -26,6 +27,7 @@ const SIDEBAR_COLLAPSED_KEY = 'veyro-sidebar-collapsed';
     RouterOutlet, RouterLink, RouterLinkActive,
     MatToolbarModule, MatSidenavModule, MatListModule,
     MatIconModule, MatButtonModule, MatMenuModule, MatTooltipModule, AsyncPipe,
+    AppFooterComponent,
   ],
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss',
