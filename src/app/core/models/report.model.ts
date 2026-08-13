@@ -24,13 +24,11 @@ export interface ReportSummary {
   savingsChange: MetricChange | null;
 }
 
-export type QuickFilter = 'this-month' | 'last-month' | 'this-year' | 'last-6-months';
+export type QuickFilter = 'this-month' | 'last-month' | 'this-year' | 'last-6-months' | 'custom';
 
 export function calcPercentChange(current: number, previous: number): number | null {
-  if (previous === 0) {
-    if (current === 0) return 0;
-    return 100;
-  }
+  if (previous === 0 && current === 0) return null;
+  if (previous === 0) return 100;
   return Math.round(((current - previous) / previous) * 1000) / 10;
 }
 
@@ -38,9 +36,10 @@ export function buildChange(current: number, previous: number, invertPositive = 
   const pct = calcPercentChange(current, previous);
   if (pct === null) return null;
   const improved = invertPositive ? pct <= 0 : pct >= 0;
+  const arrow = pct >= 0 ? '↑' : '↓';
   return {
     value: Math.abs(pct),
-    label: `${pct >= 0 ? '+' : '-'}${Math.abs(pct)}%`,
+    label: `${arrow} ${Math.abs(pct)}%`,
     positive: improved,
   };
 }

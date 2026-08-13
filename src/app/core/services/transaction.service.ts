@@ -8,6 +8,8 @@ export interface TransactionFilters {
   search?: string;
   month?: number;
   year?: number;
+  startDate?: string;
+  endDate?: string;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -29,7 +31,9 @@ export class TransactionService {
     if (filters?.search) {
       query = query.ilike('description', `%${filters.search}%`);
     }
-    if (filters?.month && filters?.year) {
+    if (filters?.startDate && filters?.endDate) {
+      query = query.gte('transaction_date', filters.startDate).lte('transaction_date', filters.endDate);
+    } else if (filters?.month && filters?.year) {
       const startDate = `${filters.year}-${String(filters.month).padStart(2, '0')}-01`;
       const endMonth = filters.month === 12 ? 1 : filters.month + 1;
       const endYear = filters.month === 12 ? filters.year + 1 : filters.year;
@@ -301,5 +305,95 @@ export class TransactionService {
     }
 
     return Array.from(categoryMap.values()).sort((a, b) => b.amount - a.amount);
+  }
+
+  async getStatsForRange(startDate: string, endDate: string): Promise<{ income: number; expenses: number }> {
+    const { data, error } = await this.supabase.client
+      .from('transactions')
+      .select('amount, type')
+      .gte('transaction_date', startDate)
+      .lte('transaction_date', endDate);
+
+    if (error) throw error;
+
+    const rows = data ?? [];
+    return {
+      income: rows.filter(t => t.type === 'income').reduce((s, t) => s + Number(t.amount), 0),
+      expenses: rows.filter(t => t.type === 'expense').reduce((s, t) => s + Number(t.amount), 0),
+    };
+  }
+
+  async getExpensesByCategoryForRange(startDate: string, endDate: string): Promise<{ name: string; amount: number; color: string }[]> {
+    const { data, error } = await this.supabase.client
+      .from('transactions')
+      .select('amount, category:categories(name, color)')
+      .eq('type', 'expense')
+      .gte('transaction_date', startDate)
+      .lte('transaction_date', endDate);
+
+    if (error) throw error;
+
+    const categoryMap = new Map<string, { name: string; amount: number; color: string }>();
+    for (const t of data ?? []) {
+      const raw = t.category as unknown;
+      const cat = (Array.isArray(raw) ? raw[0] : raw) as { name: string; color: string } | null;
+      const name = cat?.name ?? 'Uncategorized';
+      const color = cat?.color ?? '#64748b';
+      const existing = categoryMap.get(name);
+      if (existing) {
+        existing.amount += Number(t.amount);
+      } else {
+        categoryMap.set(name, { name, amount: Number(t.amount), color });
+      }
+    }
+
+    return Array.from(categoryMap.values()).sort((a, b) => b.amount - a.amount);
+  }
+
+  async getTrendForRange(startDate: string, endDate: string): Promise<{ month: string; income: number; expenses: number }[]> {
+    const { data, error } = await this.supabase.client
+      .from('transactions')
+      .select('amount, type, transaction_date')
+      .gte('transaction_date', startDate)
+      .lte('transaction_date', endDate);
+
+    if (error) throw error;
+
+    const bucketMap = new Map<string, { income: number; expenses: number }>();
+    for (const t of data ?? []) {
+      const key = t.transaction_date.slice(0, 7);
+      const bucket = bucketMap.get(key) ?? { income: 0, expenses: 0 };
+      if (t.type === 'income') bucket.income += Number(t.amount);
+      else bucket.expenses += Number(t.amount);
+      bucketMap.set(key, bucket);
+    }
+
+    return Array.from(bucketMap.entries())
+      .sort(([a], [b]) => a.localeCompare(b))
+      .map(([key, stats]) => {
+        const [y, m] = key.split('-').map(Number);
+        const label = new Date(y, m - 1, 1).toLocaleDateString('en-US', { month: 'short', year: '2-digit' });
+        return { month: label, ...stats };
+      });
+  }
+
+  daysInRange(startDate: string, endDate: string): number {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    return Math.max(1, Math.ceil((end.getTime() - start.getTime()) / 86400000) + 1);
+  }
+
+  previousRange(startDate: string, endDate: string): { startDate: string; endDate: string } {
+    const start = new Date(startDate);
+    const end = new Date(endDate);
+    const days = this.daysInRange(startDate, endDate);
+    const prevEnd = new Date(start);
+    prevEnd.setDate(prevEnd.getDate() - 1);
+    const prevStart = new Date(prevEnd);
+    prevStart.setDate(prevStart.getDate() - days + 1);
+    return {
+      startDate: prevStart.toISOString().slice(0, 10),
+      endDate: prevEnd.toISOString().slice(0, 10),
+    };
   }
 }

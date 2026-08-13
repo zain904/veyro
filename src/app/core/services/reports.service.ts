@@ -6,7 +6,7 @@ import { Transaction } from '../models/transaction.model';
 import { CategoryChartItem, TrendChartItem } from './chart-builder.service';
 import { previousPeriod } from '../utils/date.util';
 
-export type ReportMode = 'month' | 'year';
+export type ReportMode = 'month' | 'year' | 'custom';
 
 export interface ReportsData {
   summary: ReportSummary;
@@ -15,7 +15,10 @@ export interface ReportsData {
   expenseCategories: CategoryChartItem[];
   recentTransactions: Transaction[];
   mode: ReportMode;
+  periodLabel?: string;
 }
+
+const RECENT_TX_LIMIT = 8;
 
 @Injectable({ providedIn: 'root' })
 export class ReportsService {
@@ -28,12 +31,67 @@ export class ReportsService {
     month: number,
     year: number,
     trendMonths = 6,
-    mode: ReportMode = 'month'
+    mode: ReportMode = 'month',
+    customRange?: { startDate: string; endDate: string }
   ): Promise<ReportsData> {
+    if (mode === 'custom' && customRange) {
+      return this.loadCustomReports(customRange.startDate, customRange.endDate, month, year);
+    }
     if (mode === 'year') {
       return this.loadYearlyReports(year, month);
     }
     return this.loadMonthlyReports(month, year, trendMonths);
+  }
+
+  private async loadCustomReports(
+    startDate: string,
+    endDate: string,
+    budgetMonth: number,
+    budgetYear: number
+  ): Promise<ReportsData> {
+    const prev = this.transactionService.previousRange(startDate, endDate);
+    const days = this.transactionService.daysInRange(startDate, endDate);
+    const prevDays = this.transactionService.daysInRange(prev.startDate, prev.endDate);
+
+    const [
+      stats,
+      prevStats,
+      trend,
+      expenseCategories,
+      recentTransactions,
+      txCount,
+      prevTxCount,
+      budgets,
+    ] = await Promise.all([
+      this.transactionService.getStatsForRange(startDate, endDate),
+      this.transactionService.getStatsForRange(prev.startDate, prev.endDate),
+      this.transactionService.getTrendForRange(startDate, endDate),
+      this.transactionService.getExpensesByCategoryForRange(startDate, endDate),
+      this.transactionService.getTransactions({ startDate, endDate }),
+      this.getRangeTransactionCount(startDate, endDate),
+      this.getRangeTransactionCount(prev.startDate, prev.endDate),
+      this.budgetService.getBudgets(budgetMonth, budgetYear),
+    ]);
+
+    const avgDaily = stats.expenses / days;
+    const prevAvgDaily = prevStats.expenses / prevDays;
+
+    return {
+      mode: 'custom',
+      periodLabel: `${startDate} – ${endDate}`,
+      ...this.buildReportPayload(
+        stats,
+        prevStats,
+        avgDaily,
+        prevAvgDaily,
+        txCount,
+        prevTxCount,
+        budgets,
+        trend,
+        expenseCategories,
+        recentTransactions.slice(0, RECENT_TX_LIMIT)
+      ),
+    };
   }
 
   private async loadMonthlyReports(month: number, year: number, trendMonths: number): Promise<ReportsData> {
@@ -66,7 +124,7 @@ export class ReportsService {
 
     return {
       mode: 'month',
-      ...this.buildReportPayload(stats, prevStats, avgDaily, prevAvgDaily, txCount, prevTxCount, budgets, trend, expenseCategories, recentTransactions.slice(0, 6)),
+      ...this.buildReportPayload(stats, prevStats, avgDaily, prevAvgDaily, txCount, prevTxCount, budgets, trend, expenseCategories, recentTransactions.slice(0, RECENT_TX_LIMIT)),
     };
   }
 
@@ -103,7 +161,7 @@ export class ReportsService {
 
     return {
       mode: 'year',
-      ...this.buildReportPayload(stats, prevStats, avgDaily, prevAvgDaily, txCount, prevTxCount, budgets, trend, expenseCategories, recentTransactions.slice(0, 6)),
+      ...this.buildReportPayload(stats, prevStats, avgDaily, prevAvgDaily, txCount, prevTxCount, budgets, trend, expenseCategories, recentTransactions.slice(0, RECENT_TX_LIMIT)),
     };
   }
 
@@ -162,7 +220,8 @@ export class ReportsService {
   }
 
   exportCsv(data: ReportsData, month: number, year: number): void {
-    const period = data.mode === 'year' ? `${year}` : `${month}/${year}`;
+    const period = data.periodLabel
+      ?? (data.mode === 'year' ? `${year}` : `${month}/${year}`);
     const rows = [
       ['Veyro Report', period],
       [],
@@ -197,6 +256,11 @@ export class ReportsService {
 
   private async getTransactionCount(month: number, year: number): Promise<number> {
     const txs = await this.transactionService.getTransactions({ month, year });
+    return txs.length;
+  }
+
+  private async getRangeTransactionCount(startDate: string, endDate: string): Promise<number> {
+    const txs = await this.transactionService.getTransactions({ startDate, endDate });
     return txs.length;
   }
 

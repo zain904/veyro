@@ -37,14 +37,23 @@ import { ThemeService } from '../../../core/services/theme.service';
 
     .chart-empty {
       display: flex;
+      flex-direction: column;
       align-items: center;
       justify-content: center;
+      gap: 8px;
       min-height: 220px;
       color: var(--text-secondary);
-      font-size: 14px;
+      font-size: 13px;
       border: 1px dashed var(--border-color);
       border-radius: 12px;
       background: var(--hover-color);
+
+      &::before {
+        content: 'bar_chart';
+        font-family: 'Material Icons';
+        font-size: 28px;
+        opacity: 0.35;
+      }
     }
   `],
 })

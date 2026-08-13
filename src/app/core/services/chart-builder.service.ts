@@ -178,7 +178,7 @@ export class ChartBuilderService {
               },
               total: {
                 show: true,
-                label: 'Total spent',
+                label: 'Total Expenses',
                 color: p.textMuted,
                 fontSize: '12px',
                 formatter: () => this.formatCompact(total),
@@ -405,7 +405,9 @@ export class ChartBuilderService {
     return this.cashFlowBarChart(income, expenses);
   }
 
-  incomeExpenseGroupedBarChart(trend: TrendChartItem[]): ApexOptions {
+  incomeExpenseGroupedBarChart(trend: TrendChartItem[]): ApexOptions | null {
+    if (!trend.length || trend.every(t => t.income === 0 && t.expenses === 0)) return null;
+
     const mobile = this.isMobile();
 
     return {
@@ -440,7 +442,9 @@ export class ChartBuilderService {
     };
   }
 
-  cashFlowNetChart(trend: TrendChartItem[]): ApexOptions {
+  cashFlowNetChart(trend: TrendChartItem[]): ApexOptions | null {
+    if (!trend.length || trend.every(t => t.income === 0 && t.expenses === 0)) return null;
+
     const net = trend.map(t => t.income - t.expenses);
     const p = this.palette();
 
