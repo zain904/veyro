@@ -1,0 +1,141 @@
+<div class="login-page">
+  <div class="login-left">
+    <div class="hero">
+      <div class="hero-icon">V</div>
+      <h1>Veyro</h1>
+      <p class="tagline">Know where your money goes.</p>
+      <p class="description">
+        Track income, manage expenses, set budgets, and take control of your finances — all in one place.
+      </p>
+      <div class="features">
+        <div class="feature">
+          <mat-icon>trending_up</mat-icon>
+          <span>Smart insights</span>
+        </div>
+        <div class="feature">
+          <mat-icon>account_balance_wallet</mat-icon>
+          <span>Budget tracking</span>
+        </div>
+        <div class="feature">
+          <mat-icon>bar_chart</mat-icon>
+          <span>Visual reports</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="login-right">
+    <mat-card class="login-card">
+      @if (emailConfirmationSent()) {
+        <div class="confirmation-state">
+          <div class="confirmation-icon">
+            <mat-icon>mark_email_read</mat-icon>
+          </div>
+          <h2>Check your email</h2>
+          <p class="subtitle">
+            We sent a verification link to
+            <strong>{{ pendingEmail() }}</strong>.
+            Click the link in that email to activate your account.
+          </p>
+
+          <div class="confirmation-steps">
+            <div class="step">
+              <mat-icon>inbox</mat-icon>
+              <span>Open your inbox</span>
+            </div>
+            <div class="step">
+              <mat-icon>link</mat-icon>
+              <span>Click the verify link</span>
+            </div>
+            <div class="step">
+              <mat-icon>login</mat-icon>
+              <span>Come back and sign in</span>
+            </div>
+          </div>
+
+          @if (successMessage()) {
+            <div class="success-message">
+              <mat-icon>check_circle</mat-icon>
+              {{ successMessage() }}
+            </div>
+          }
+
+          @if (error()) {
+            <div class="error-message">
+              <mat-icon>error_outline</mat-icon>
+              {{ error() }}
+            </div>
+          }
+
+          <button
+            mat-stroked-button
+            color="primary"
+            class="resend-btn"
+            type="button"
+            (click)="resendConfirmation()"
+            [disabled]="resending()">
+            @if (resending()) {
+              <mat-spinner diameter="18"></mat-spinner>
+            } @else {
+              Resend verification email
+            }
+          </button>
+
+          <button mat-button color="primary" class="back-btn" type="button" (click)="backToSignIn()">
+            Back to sign in
+          </button>
+        </div>
+      } @else {
+        <h2>{{ isSignUp() ? 'Create account' : 'Welcome back' }}</h2>
+        <p class="subtitle">{{ isSignUp() ? 'Start managing your finances today' : 'Sign in to your account' }}</p>
+
+        <form [formGroup]="form" (ngSubmit)="onSubmit()">
+          @if (isSignUp()) {
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Full name</mat-label>
+              <input matInput formControlName="fullName" placeholder="Zain Ahmed">
+              <mat-icon matPrefix>person</mat-icon>
+            </mat-form-field>
+          }
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Email</mat-label>
+            <input matInput formControlName="email" type="email" placeholder="you@example.com">
+            <mat-icon matPrefix>email</mat-icon>
+          </mat-form-field>
+
+          <mat-form-field appearance="outline" class="full-width">
+            <mat-label>Password</mat-label>
+            <input matInput formControlName="password" [type]="hidePassword() ? 'password' : 'text'">
+            <mat-icon matPrefix>lock</mat-icon>
+            <button mat-icon-button matSuffix type="button" (click)="hidePassword.set(!hidePassword())">
+              <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
+            </button>
+          </mat-form-field>
+
+          @if (error()) {
+            <div class="error-message">
+              <mat-icon>error_outline</mat-icon>
+              {{ error() }}
+            </div>
+          }
+
+          <button mat-flat-button color="primary" class="submit-btn" type="submit" [disabled]="loading() || form.invalid">
+            @if (loading()) {
+              <mat-spinner diameter="20"></mat-spinner>
+            } @else {
+              {{ isSignUp() ? 'Create account' : 'Sign in' }}
+            }
+          </button>
+        </form>
+
+        <p class="toggle-mode">
+          {{ isSignUp() ? 'Already have an account?' : "Don't have an account?" }}
+          <button mat-button color="primary" type="button" (click)="toggleMode()">
+            {{ isSignUp() ? 'Sign in' : 'Sign up' }}
+          </button>
+        </p>
+      }
+    </mat-card>
+  </div>
+</div>

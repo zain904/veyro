@@ -1,0 +1,59 @@
+.filters-card {
+  padding: 16px 20px !important;
+  margin-bottom: 24px;
+}
+
+.filters {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+
+  mat-form-field {
+    flex: 1;
+    min-width: 140px;
+  }
+
+  .search-field {
+    flex: 2;
+    min-width: 200px;
+  }
+}
+
+.date-group {
+  margin-bottom: 20px;
+}
+
+.date-label {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text-secondary);
+  margin: 0 0 8px 4px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.transaction-group-card {
+  padding: 0 !important;
+  overflow: hidden;
+}
+
+.tx-actions-col {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.tx-actions {
+  display: flex;
+
+  button mat-icon { font-size: 18px; }
+}
+
+@media (max-width: 600px) {
+  .tx-actions { display: none; }
+}
+
+.header-actions button mat-icon {
+  margin-right: 4px;
+}

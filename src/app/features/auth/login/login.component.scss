@@ -1,0 +1,240 @@
+.login-page {
+  display: flex;
+  min-height: 100vh;
+}
+
+.login-left {
+  flex: 1;
+  background: linear-gradient(135deg, #0f766e 0%, #134e4a 50%, #042f2e 100%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px;
+  color: white;
+
+  @media (max-width: 900px) {
+    display: none;
+  }
+}
+
+.hero {
+  max-width: 420px;
+
+  .hero-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.15);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 24px;
+    font-weight: 700;
+    margin-bottom: 24px;
+  }
+
+  h1 {
+    font-size: 42px;
+    font-weight: 700;
+    margin: 0 0 8px;
+  }
+
+  .tagline {
+    font-size: 18px;
+    opacity: 0.9;
+    margin: 0 0 24px;
+  }
+
+  .description {
+    font-size: 15px;
+    line-height: 1.6;
+    opacity: 0.75;
+    margin: 0 0 32px;
+  }
+}
+
+.features {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+
+  .feature {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    font-size: 14px;
+    opacity: 0.85;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+    }
+  }
+}
+
+.login-right {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: var(--bg-color);
+}
+
+.login-card {
+  width: 100%;
+  max-width: 420px;
+  padding: 40px 32px;
+  border-radius: 16px !important;
+  box-shadow: var(--card-shadow) !important;
+  background: var(--surface-color) !important;
+
+  h2 {
+    margin: 0 0 4px;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .subtitle {
+    margin: 0 0 32px;
+    color: var(--text-secondary);
+    font-size: 14px;
+  }
+}
+
+.full-width {
+  width: 100%;
+  margin-bottom: 4px;
+}
+
+.error-message {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  color: #ef4444;
+  font-size: 13px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: rgba(239, 68, 68, 0.08);
+  border-radius: 8px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.submit-btn {
+  width: 100%;
+  height: 48px;
+  font-size: 15px;
+  border-radius: 10px !important;
+  margin-top: 8px;
+}
+
+.toggle-mode {
+  text-align: center;
+  margin-top: 24px;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.confirmation-state {
+  text-align: center;
+
+  .confirmation-icon {
+    width: 64px;
+    height: 64px;
+    margin: 0 auto 20px;
+    border-radius: 50%;
+    background: rgba(13, 148, 136, 0.12);
+    color: var(--primary-color);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    mat-icon {
+      font-size: 32px;
+      width: 32px;
+      height: 32px;
+    }
+  }
+
+  h2 {
+    margin: 0 0 8px;
+    font-size: 24px;
+    font-weight: 600;
+    color: var(--text-primary);
+  }
+
+  .subtitle {
+    margin: 0 0 24px;
+    color: var(--text-secondary);
+    font-size: 14px;
+    line-height: 1.6;
+
+    strong {
+      color: var(--text-primary);
+      word-break: break-all;
+    }
+  }
+}
+
+.confirmation-steps {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  margin-bottom: 24px;
+  text-align: left;
+
+  .step {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 12px 14px;
+    border-radius: 10px;
+    background: var(--hover-color);
+    color: var(--text-secondary);
+    font-size: 14px;
+
+    mat-icon {
+      font-size: 20px;
+      width: 20px;
+      height: 20px;
+      color: var(--primary-color);
+    }
+  }
+}
+
+.success-message {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  color: #16a34a;
+  font-size: 13px;
+  margin-bottom: 16px;
+  padding: 10px 14px;
+  background: rgba(34, 197, 94, 0.1);
+  border-radius: 8px;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+}
+
+.resend-btn {
+  width: 100%;
+  height: 44px;
+  margin-bottom: 8px;
+}
+
+.back-btn {
+  width: 100%;
+}

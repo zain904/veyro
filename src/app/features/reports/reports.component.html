@@ -1,0 +1,263 @@
+<div class="reports-page">
+  <!-- Header -->
+  <div class="reports-header">
+    <div class="header-left">
+      <nav class="breadcrumbs">
+        <span>Home</span>
+        <mat-icon>chevron_right</mat-icon>
+        <span class="current">Reports</span>
+      </nav>
+      <h1>Reports</h1>
+      <p class="subtitle">{{ periodLabel }} · Visualize your financial patterns</p>
+    </div>
+
+    <div class="header-actions">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Month</mat-label>
+        <mat-select [(ngModel)]="filterMonth" (ngModelChange)="onPeriodChange()">
+          @for (m of months; track m.value) {
+            <mat-option [value]="m.value">{{ m.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field year-field">
+        <mat-label>Year</mat-label>
+        <mat-select [(ngModel)]="filterYear" (ngModelChange)="onPeriodChange()">
+          @for (y of years; track y) {
+            <mat-option [value]="y">{{ y }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <button mat-flat-button color="primary" class="export-btn" (click)="exportReport()">
+        <mat-icon>download</mat-icon>
+        Export
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton-grid">
+      @for (i of [1,2,3,4]; track i) {
+        <div class="skeleton-card"></div>
+      }
+    </div>
+  } @else if (summary() && insights()) {
+    <!-- Primary KPI row -->
+    <div class="kpi-row">
+      <mat-card class="kpi-card income-card">
+        <div class="kpi-top">
+          <div class="kpi-icon"><mat-icon>trending_up</mat-icon></div>
+          @if (summary()!.incomeChange; as ch) {
+            <span class="change-badge" [class.positive]="ch.positive" [class.negative]="!ch.positive">{{ ch.label }}</span>
+          }
+        </div>
+        <span class="kpi-label">Total Income</span>
+        <span class="kpi-value">{{ summary()!.income | veyroCurrency }}</span>
+        <span class="kpi-hint">vs last month</span>
+      </mat-card>
+
+      <mat-card class="kpi-card expense-card">
+        <div class="kpi-top">
+          <div class="kpi-icon"><mat-icon>trending_down</mat-icon></div>
+          @if (summary()!.expensesChange; as ch) {
+            <span class="change-badge" [class.positive]="ch.positive" [class.negative]="!ch.positive">{{ ch.label }}</span>
+          }
+        </div>
+        <span class="kpi-label">Total Expenses</span>
+        <span class="kpi-value">{{ summary()!.expenses | veyroCurrency }}</span>
+        <span class="kpi-hint">vs last month</span>
+      </mat-card>
+
+      <mat-card class="kpi-card net-card">
+        <div class="kpi-top">
+          <div class="kpi-icon"><mat-icon>account_balance</mat-icon></div>
+          @if (summary()!.netChange; as ch) {
+            <span class="change-badge" [class.positive]="ch.positive" [class.negative]="!ch.positive">{{ ch.label }}</span>
+          }
+        </div>
+        <span class="kpi-label">Net</span>
+        <span class="kpi-value" [class.negative]="summary()!.net < 0">{{ summary()!.net | veyroCurrency }}</span>
+        <span class="kpi-hint">Income − Expenses</span>
+      </mat-card>
+
+      <mat-card class="kpi-card savings-card">
+        <div class="kpi-top">
+          <div class="kpi-icon"><mat-icon>savings</mat-icon></div>
+          @if (summary()!.savingsChange; as ch) {
+            <span class="change-badge" [class.positive]="ch.positive" [class.negative]="!ch.positive">{{ ch.label }}</span>
+          }
+        </div>
+        <span class="kpi-label">Savings Rate</span>
+        <div class="savings-row">
+          <span class="kpi-value">{{ summary()!.savingsRate }}%</span>
+          <div class="savings-ring" [style.--pct]="summary()!.savingsRate">
+            <span class="ring-label">{{ summary()!.savingsRate | number:'1.0-0' }}%</span>
+          </div>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Secondary insights -->
+    <div class="insights-row">
+      <mat-card class="insight-card">
+        <mat-icon>receipt_long</mat-icon>
+        <div>
+          <span class="insight-label">Total Transactions</span>
+          <span class="insight-value">{{ insights()!.transactionCount }}</span>
+          <span class="insight-sub" [class.positive]="insights()!.transactionCountChange >= 0">
+            {{ insights()!.transactionCountChange >= 0 ? '+' : '' }}{{ insights()!.transactionCountChange }} vs last month
+          </span>
+        </div>
+      </mat-card>
+
+      <mat-card class="insight-card">
+        <mat-icon>calendar_today</mat-icon>
+        <div>
+          <span class="insight-label">Avg Daily Expense</span>
+          <span class="insight-value">{{ insights()!.avgDailyExpense | veyroCurrency }}</span>
+          @if (insights()!.avgDailyChange; as ch) {
+            <span class="insight-sub" [class.positive]="ch.positive" [class.negative]="!ch.positive">{{ ch.label }} vs last month</span>
+          }
+        </div>
+      </mat-card>
+
+      <mat-card class="insight-card">
+        <mat-icon>shopping_bag</mat-icon>
+        <div>
+          <span class="insight-label">Highest Expense</span>
+          @if (insights()!.highestExpense; as hi) {
+            <span class="insight-value">{{ hi.name }}</span>
+            <span class="insight-sub">{{ hi.amount | veyroCurrency }}</span>
+          } @else {
+            <span class="insight-value">—</span>
+            <span class="insight-sub">No expenses yet</span>
+          }
+        </div>
+      </mat-card>
+
+      <mat-card class="insight-card">
+        <mat-icon>event</mat-icon>
+        <div>
+          <span class="insight-label">Upcoming Bills</span>
+          <span class="insight-value">{{ insights()!.upcomingBills.count }}</span>
+          <span class="insight-sub">{{ insights()!.upcomingBills.total | veyroCurrency }} remaining in budgets</span>
+        </div>
+      </mat-card>
+    </div>
+
+    <!-- Charts grid -->
+    <div class="charts-grid">
+      <mat-card class="chart-panel wide">
+        <div class="panel-header">
+          <div>
+            <h3>Income vs Expenses</h3>
+            <span class="panel-hint">{{ trendMonths }}-month trend</span>
+          </div>
+          <div class="legend-dots">
+            <span><i class="dot income"></i> Income</span>
+            <span><i class="dot expense"></i> Expenses</span>
+          </div>
+        </div>
+        @if (groupedBarOptions()) {
+          <app-chart [options]="groupedBarOptions()!" [minHeight]="280" />
+        }
+      </mat-card>
+
+      <mat-card class="chart-panel">
+        <div class="panel-header">
+          <h3>Expense by Category</h3>
+        </div>
+        <app-chart
+          [options]="donutOptions()!"
+          [empty]="!donutOptions()"
+          emptyMessage="No expense data for this period" />
+      </mat-card>
+
+      <mat-card class="chart-panel">
+        <div class="panel-header">
+          <h3>Top Spending Categories</h3>
+        </div>
+        <app-chart
+          [options]="topCategoriesOptions()!"
+          [empty]="!topCategoriesOptions()"
+          emptyMessage="No spending data yet" />
+      </mat-card>
+
+      <mat-card class="chart-panel">
+        <div class="panel-header">
+          <h3>Cash Flow Trend</h3>
+          <span class="panel-hint">Net over time</span>
+        </div>
+        @if (cashFlowOptions()) {
+          <app-chart [options]="cashFlowOptions()!" [minHeight]="240" />
+        }
+      </mat-card>
+    </div>
+
+    <!-- Bottom row: transactions + category list -->
+    <div class="bottom-row">
+      <mat-card class="transactions-panel">
+        <div class="panel-header">
+          <h3>Recent Transactions</h3>
+        </div>
+        @if (recentTransactions().length === 0) {
+          <div class="empty-state">No transactions this period</div>
+        } @else {
+          <div class="tx-list">
+            @for (tx of recentTransactions(); track tx.id) {
+              <div class="tx-row">
+                <div class="tx-icon" [style.background]="(tx.category?.color ?? '#64748b') + '22'" [style.color]="tx.category?.color">
+                  <mat-icon>{{ tx.category?.icon || 'receipt' }}</mat-icon>
+                </div>
+                <div class="tx-info">
+                  <span class="tx-name">{{ tx.category?.name || tx.description || 'Transaction' }}</span>
+                  <span class="tx-meta">{{ tx.category?.name }} · {{ formatDate(tx.transaction_date) }}</span>
+                </div>
+                <span class="tx-amt" [class.income]="tx.type === 'income'" [class.expense]="tx.type === 'expense'">
+                  {{ tx.type === 'income' ? '+' : '−' }} {{ tx.amount | veyroCurrency }}
+                </span>
+              </div>
+            }
+          </div>
+        }
+      </mat-card>
+
+      <mat-card class="category-panel">
+        <div class="panel-header">
+          <h3>Category Breakdown</h3>
+        </div>
+        @if (expenseCategories().length === 0) {
+          <div class="empty-state">No categories to show</div>
+        } @else {
+          <div class="cat-list">
+            @for (cat of expenseCategories(); track cat.name) {
+              <div class="cat-row">
+                <span class="cat-dot" [style.background]="cat.color"></span>
+                <span class="cat-name">{{ cat.name }}</span>
+                <div class="cat-bar-track">
+                  <div class="cat-bar" [style.width.%]="categoryPercent(cat.amount)" [style.background]="cat.color"></div>
+                </div>
+                <span class="cat-pct">{{ categoryPercent(cat.amount) }}%</span>
+                <span class="cat-amt">{{ cat.amount | veyroCurrency }}</span>
+              </div>
+            }
+          </div>
+        }
+      </mat-card>
+    </div>
+
+    <!-- Quick filters -->
+    <div class="quick-filters">
+      @for (qf of quickFilters; track qf.id) {
+        <button
+          mat-stroked-button
+          [class.active]="activeQuickFilter() === qf.id"
+          (click)="applyQuickFilter(qf.id)">
+          {{ qf.label }}
+        </button>
+      }
+    </div>
+  }
+</div>

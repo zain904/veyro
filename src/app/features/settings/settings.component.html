@@ -1,0 +1,69 @@
+<div class="settings-page">
+  <div class="veyro-page-header">
+    <div>
+      <nav class="breadcrumbs">
+        <span>Home</span>
+        <mat-icon>chevron_right</mat-icon>
+        <span class="current">Settings</span>
+      </nav>
+      <h1>Settings</h1>
+      <p class="subtitle">Manage your account and preferences</p>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton-grid">
+      @for (i of [1,2]; track i) { <div class="skeleton-card"></div> }
+    </div>
+  } @else {
+    <div class="settings-grid">
+      <mat-card class="panel-card">
+        <div class="panel-header">
+          <h3>Profile</h3>
+          <span class="hint">{{ (auth.user$ | async)?.email }}</span>
+        </div>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Full name</mat-label>
+          <input matInput [(ngModel)]="fullName">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>Currency</mat-label>
+          <input matInput [value]="profile()?.currency ?? 'PKR'" disabled>
+        </mat-form-field>
+        @if (message()) {
+          <p class="save-msg">{{ message() }}</p>
+        }
+        <button mat-flat-button color="primary" (click)="saveProfile()" [disabled]="saving()">
+          Save profile
+        </button>
+      </mat-card>
+
+      <mat-card class="panel-card">
+        <div class="panel-header">
+          <h3>Appearance</h3>
+          <span class="hint">Theme preference</span>
+        </div>
+        <div class="theme-row">
+          <div>
+            <strong>Dark mode</strong>
+            <p>Switch between light and dark themes</p>
+          </div>
+          <mat-slide-toggle
+            [checked]="theme.theme() === 'dark'"
+            (change)="toggleTheme()">
+          </mat-slide-toggle>
+        </div>
+      </mat-card>
+
+      <mat-card class="panel-card">
+        <div class="panel-header">
+          <h3>Account</h3>
+        </div>
+        <button mat-stroked-button color="warn" (click)="auth.signOut()">
+          <mat-icon>logout</mat-icon>
+          Sign out
+        </button>
+      </mat-card>
+    </div>
+  }
+</div>

@@ -1,0 +1,270 @@
+@use '@angular/material' as mat;
+
+@include mat.core();
+
+$veyro-theme: (
+  color: (
+    primary: mat.$green-palette,
+    tertiary: mat.$cyan-palette,
+  ),
+  typography: Inter,
+  density: 0,
+);
+
+html {
+  @include mat.theme(map-merge($veyro-theme, (color: map-merge(map-get($veyro-theme, color), (theme-type: light)))));
+}
+
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+@import url('https://fonts.googleapis.com/icon?family=Material+Icons');
+@import 'app/shared/styles/page';
+
+:root {
+  --primary-color: #0d9488;
+  --primary-light: rgba(13, 148, 136, 0.1);
+  --accent-color: #14b8a6;
+  --bg-color: #f8fafc;
+  --surface-color: #ffffff;
+  --surface-elevated: #ffffff;
+  --text-primary: #0f172a;
+  --text-secondary: #64748b;
+  --border-color: #e2e8f0;
+  --hover-color: #f1f5f9;
+  --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --dialog-scrim: rgba(15, 23, 42, 0.5);
+  --btn-primary-text: #ffffff;
+}
+
+body.dark-theme {
+  @include mat.theme(map-merge($veyro-theme, (color: map-merge(map-get($veyro-theme, color), (theme-type: dark)))));
+
+  & {
+    --primary-color: #2dd4bf;
+    --primary-light: rgba(45, 212, 191, 0.15);
+    --accent-color: #14b8a6;
+    --bg-color: #0f172a;
+    --surface-color: #1e293b;
+    --surface-elevated: #273449;
+    --text-primary: #f1f5f9;
+    --text-secondary: #94a3b8;
+    --border-color: #475569;
+    --hover-color: #334155;
+    --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
+    --dialog-scrim: rgba(0, 0, 0, 0.65);
+    --btn-primary-text: #042f2e;
+
+    color-scheme: dark;
+  }
+}
+
+*, *::before, *::after {
+  box-sizing: border-box;
+}
+
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+body {
+  font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+  background: var(--bg-color);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+}
+
+// ── Cards ──────────────────────────────────────────────
+.mat-mdc-card {
+  --mdc-elevated-card-container-color: var(--surface-color);
+  color: var(--text-primary);
+}
+
+// ── Dialogs / Modals ─────────────────────────────────
+.cdk-overlay-dark-backdrop {
+  background: var(--dialog-scrim);
+}
+
+.mat-mdc-dialog-container {
+  --mdc-dialog-container-color: var(--surface-elevated);
+  --mdc-dialog-subhead-color: var(--text-primary);
+  --mdc-dialog-supporting-text-color: var(--text-secondary);
+  color: var(--text-primary);
+  border: 1px solid var(--border-color);
+  border-radius: 16px !important;
+}
+
+.mat-mdc-dialog-container .mat-mdc-dialog-title,
+.mat-mdc-dialog-container h2[mat-dialog-title] {
+  color: var(--text-primary) !important;
+  font-weight: 600;
+}
+
+.mat-mdc-dialog-container .mat-mdc-dialog-content {
+  color: var(--text-primary);
+}
+
+.mat-mdc-dialog-container .mat-mdc-dialog-actions {
+  border-top: 1px solid var(--border-color);
+  padding-top: 12px;
+}
+
+// ── Form fields ───────────────────────────────────────
+.mat-mdc-form-field {
+  width: 100%;
+
+  --mdc-outlined-text-field-label-text-color: var(--text-secondary);
+  --mdc-outlined-text-field-input-text-color: var(--text-primary);
+  --mdc-outlined-text-field-outline-color: var(--border-color);
+  --mdc-outlined-text-field-hover-outline-color: var(--text-secondary);
+  --mdc-outlined-text-field-focus-outline-color: var(--primary-color);
+  --mdc-outlined-text-field-focus-label-text-color: var(--primary-color);
+  --mdc-outlined-text-field-caret-color: var(--primary-color);
+  --mdc-outlined-text-field-disabled-label-text-color: var(--text-secondary);
+  --mdc-outlined-text-field-disabled-input-text-color: var(--text-secondary);
+  --mat-select-enabled-trigger-text-color: var(--text-primary);
+  --mat-select-enabled-arrow-color: var(--text-secondary);
+  --mat-select-focused-arrow-color: var(--primary-color);
+  --mat-form-field-focus-select-arrow-color: var(--primary-color);
+}
+
+.mat-mdc-text-field-wrapper .mat-mdc-form-field-icon-prefix,
+.mat-mdc-text-field-wrapper .mat-mdc-form-field-text-prefix {
+  color: var(--text-secondary);
+}
+
+// ── Select dropdown ─────────────────────────────────────
+.mat-mdc-select-panel {
+  background: var(--surface-elevated) !important;
+}
+
+.mat-mdc-option {
+  color: var(--text-primary) !important;
+
+  &:hover:not(.mdc-list-item--disabled) {
+    background: var(--hover-color) !important;
+  }
+
+  &.mdc-list-item--selected:not(.mdc-list-item--disabled) {
+    background: var(--primary-light) !important;
+    color: var(--primary-color) !important;
+  }
+}
+
+// ── Datepicker ──────────────────────────────────────────
+.mat-datepicker-content {
+  background: var(--surface-elevated) !important;
+  color: var(--text-primary) !important;
+}
+
+.mat-calendar {
+  background: var(--surface-elevated);
+  color: var(--text-primary);
+}
+
+.mat-calendar-body-cell-content {
+  color: var(--text-primary);
+}
+
+.mat-calendar-body-label,
+.mat-calendar-period-button,
+.mat-calendar-arrow {
+  color: var(--text-primary);
+}
+
+.mat-calendar-table-header th {
+  color: var(--text-secondary);
+}
+
+// ── Button toggle (Expense / Income) ───────────────────
+.mat-button-toggle-group {
+  border: 1px solid var(--border-color) !important;
+  border-radius: 10px !important;
+  overflow: hidden;
+}
+
+.mat-button-toggle {
+  background: var(--hover-color) !important;
+  color: var(--text-secondary) !important;
+
+  .mat-button-toggle-label-content {
+    color: var(--text-secondary) !important;
+  }
+
+  &.mat-button-toggle-checked {
+    background: var(--primary-color) !important;
+    color: var(--btn-primary-text) !important;
+
+    .mat-button-toggle-label-content {
+      color: var(--btn-primary-text) !important;
+    }
+  }
+}
+
+// ── Buttons ─────────────────────────────────────────────
+.mat-mdc-button, .mat-mdc-raised-button, .mat-mdc-flat-button, .mat-mdc-stroked-button {
+  border-radius: 10px !important;
+}
+
+.mat-mdc-button:not(:disabled) {
+  color: var(--text-secondary);
+}
+
+.mat-mdc-flat-button.mat-primary,
+.mat-mdc-raised-button.mat-primary,
+.mat-mdc-unelevated-button.mat-primary {
+  --mdc-filled-button-container-color: var(--primary-color);
+  --mdc-filled-button-label-text-color: var(--btn-primary-text);
+  --mdc-filled-button-disabled-container-color: var(--border-color);
+  --mdc-filled-button-disabled-label-text-color: var(--text-secondary);
+}
+
+.mat-mdc-outlined-button,
+.mat-mdc-stroked-button {
+  --mdc-outlined-button-label-text-color: var(--primary-color);
+  --mdc-outlined-button-outline-color: var(--border-color);
+}
+
+// ── Navigation / Layout ───────────────────────────────
+.mat-mdc-nav-list .mat-mdc-list-item {
+  --mdc-list-list-item-label-text-color: var(--text-secondary);
+  --mdc-list-list-item-leading-icon-color: var(--text-secondary);
+}
+
+.mat-drawer-container {
+  background: var(--bg-color);
+}
+
+.mat-drawer {
+  background: var(--surface-color);
+}
+
+.mat-mdc-menu-panel {
+  background: var(--surface-elevated) !important;
+}
+
+.mat-mdc-menu-item {
+  color: var(--text-primary) !important;
+
+  mat-icon {
+    color: var(--text-secondary) !important;
+  }
+}
+
+// ── Progress bars ───────────────────────────────────────
+.mat-mdc-progress-bar {
+  --mdc-linear-progress-track-color: var(--border-color);
+}
+
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+::-webkit-scrollbar-thumb {
+  background: var(--border-color);
+  border-radius: 3px;
+}

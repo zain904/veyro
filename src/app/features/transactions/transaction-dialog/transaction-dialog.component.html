@@ -1,0 +1,55 @@
+<h2 mat-dialog-title>{{ isEdit ? 'Edit Transaction' : 'Add Transaction' }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form">
+    <mat-button-toggle-group formControlName="type" class="type-toggle">
+      <mat-button-toggle value="expense">Expense</mat-button-toggle>
+      <mat-button-toggle value="income">Income</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Amount</mat-label>
+      <input matInput formControlName="amount" type="number" min="0.01" step="0.01">
+      <span matTextPrefix>Rs.&nbsp;</span>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Category</mat-label>
+      <mat-select formControlName="category_id" [disabled]="loadingCategories() || categories().length === 0">
+        @if (loadingCategories()) {
+          <mat-option disabled>Loading categories...</mat-option>
+        } @else {
+          @for (cat of categories(); track cat.id) {
+            <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+          }
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (categoriesError()) {
+      <div class="categories-error">
+        <mat-icon>warning</mat-icon>
+        {{ categoriesError() }}
+      </div>
+    }
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Description</mat-label>
+      <input matInput formControlName="description" placeholder="Optional note">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>Date</mat-label>
+      <input matInput [matDatepicker]="picker" formControlName="transaction_date">
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker></mat-datepicker>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button (click)="cancel()">Cancel</button>
+  <button mat-flat-button color="primary" (click)="save()" [disabled]="form.invalid">
+    {{ isEdit ? 'Update' : 'Add' }}
+  </button>
+</mat-dialog-actions>

@@ -1,0 +1,90 @@
+<div class="categories-page">
+  <div class="veyro-page-header">
+    <div>
+      <nav class="breadcrumbs">
+        <span>Home</span>
+        <mat-icon>chevron_right</mat-icon>
+        <span class="current">Categories</span>
+      </nav>
+      <h1>Categories</h1>
+      <p class="subtitle">Your income & expense categories · {{ periodLabel }}</p>
+    </div>
+    <div class="header-actions">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Month</mat-label>
+        <mat-select [(ngModel)]="filterMonth" (ngModelChange)="load()">
+          @for (m of months; track m.value) {
+            <mat-option [value]="m.value">{{ m.label }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>Year</mat-label>
+        <mat-select [(ngModel)]="filterYear" (ngModelChange)="load()">
+          @for (y of years; track y) {
+            <mat-option [value]="y">{{ y }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton-grid">
+      @for (i of [1,2,3,4]; track i) { <div class="skeleton-card"></div> }
+    </div>
+  } @else {
+    <div class="kpi-row">
+      <mat-card class="kpi-card neutral">
+        <span class="kpi-label">Total Categories</span>
+        <span class="kpi-value">{{ categories().length }}</span>
+      </mat-card>
+      <mat-card class="kpi-card expense">
+        <span class="kpi-label">Expense Categories</span>
+        <span class="kpi-value">{{ expenseCategoryCount }}</span>
+        <span class="kpi-hint">{{ expenseTotal | veyroCurrency }} spent</span>
+      </mat-card>
+      <mat-card class="kpi-card income">
+        <span class="kpi-label">Income Categories</span>
+        <span class="kpi-value">{{ incomeCategoryCount }}</span>
+        <span class="kpi-hint">{{ incomeTotal | veyroCurrency }} earned</span>
+      </mat-card>
+    </div>
+
+    <div class="type-tabs">
+      <button mat-stroked-button [class.active]="filterType === 'all'" (click)="filterType = 'all'">All</button>
+      <button mat-stroked-button [class.active]="filterType === 'expense'" (click)="filterType = 'expense'">Expense</button>
+      <button mat-stroked-button [class.active]="filterType === 'income'" (click)="filterType = 'income'">Income</button>
+    </div>
+
+    <div class="cat-grid">
+      @for (cat of filteredCategories; track cat.id) {
+        <mat-card class="cat-card">
+          <div class="cat-header">
+            <div class="cat-icon" [style.background]="cat.color + '22'" [style.color]="cat.color">
+              <mat-icon>{{ cat.icon }}</mat-icon>
+            </div>
+            <span class="type-badge" [class.expense]="cat.type === 'expense'" [class.income]="cat.type === 'income'">
+              {{ cat.type }}
+            </span>
+          </div>
+          <h3>{{ cat.name }}</h3>
+          <div class="cat-amount">
+            @if (cat.type === 'expense') {
+              <span class="amount expense">{{ cat.spent | veyroCurrency }}</span>
+              <span class="label">spent this month</span>
+            } @else {
+              <span class="amount income">{{ cat.income | veyroCurrency }}</span>
+              <span class="label">earned this month</span>
+            }
+          </div>
+        </mat-card>
+      } @empty {
+        <mat-card class="empty-panel panel-card">
+          <mat-icon>category</mat-icon>
+          <p>No categories found. They are created automatically when you sign up.</p>
+        </mat-card>
+      }
+    </div>
+  }
+</div>
