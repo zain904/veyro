@@ -1,0 +1,80 @@
+.empty-state {
+  text-align: center;
+  padding: 48px 24px;
+  color: var(--text-secondary);
+
+  &.card {
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--border-color);
+    background: var(--surface-color);
+  }
+
+  &.compact {
+    padding: 32px 20px;
+
+    .empty-icon {
+      width: 52px;
+      height: 52px;
+
+      mat-icon {
+        font-size: 26px;
+        width: 26px;
+        height: 26px;
+      }
+    }
+
+    h3 { font-size: 16px; }
+  }
+
+  &.inline {
+    padding: 32px 16px;
+    border: none;
+    background: transparent;
+  }
+}
+
+.empty-icon {
+  width: 64px;
+  height: 64px;
+  margin: 0 auto 16px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: var(--primary-light);
+
+  mat-icon {
+    font-size: 32px;
+    width: 32px;
+    height: 32px;
+    color: var(--primary-color);
+  }
+}
+
+h3 {
+  margin: 0 0 8px;
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+p {
+  margin: 0 0 20px;
+  font-size: 14px;
+  line-height: 1.5;
+  max-width: 360px;
+  margin-inline: auto;
+}
+
+a[mat-flat-button],
+button[mat-flat-button] {
+  transition: opacity var(--transition-fast), transform var(--transition-fast);
+
+  &:hover:not(:disabled) {
+    transform: translateY(-1px);
+  }
+
+  mat-icon {
+    margin-right: 4px;
+  }
+}

@@ -70,6 +70,15 @@ export class TransactionService {
     return (data ?? []) as Transaction[];
   }
 
+  async hasAnyTransactions(): Promise<boolean> {
+    const { count, error } = await this.supabase.client
+      .from('transactions')
+      .select('id', { count: 'exact', head: true });
+
+    if (error) throw error;
+    return (count ?? 0) > 0;
+  }
+
   async getYearlyStats(year: number): Promise<{ income: number; expenses: number }> {
     const startDate = `${year}-01-01`;
     const endDate = `${year + 1}-01-01`;

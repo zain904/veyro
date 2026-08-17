@@ -1,3 +1,5 @@
+import { localeToBcp47, relativeDateLabels } from './locale.util';
+
 export const MONTHS = [
   { value: 1, label: 'January', short: 'Jan' },
   { value: 2, label: 'February', short: 'Feb' },
@@ -18,9 +20,9 @@ export function yearOptions(count = 5): number[] {
   return Array.from({ length: count }, (_, i) => current - i);
 }
 
-export function monthLabel(month: number, year: number, short = false): string {
+export function monthLabel(month: number, year: number, locale = 'en', short = false): string {
   const d = new Date(year, month - 1, 1);
-  return d.toLocaleDateString('en-US', {
+  return d.toLocaleDateString(localeToBcp47(locale), {
     month: short ? 'short' : 'long',
     year: 'numeric',
   });
@@ -31,18 +33,27 @@ export function previousPeriod(month: number, year: number): { month: number; ye
   return { month: month - 1, year };
 }
 
-export function formatRelativeDate(dateStr: string): string {
+export function formatRelativeDate(dateStr: string, locale = 'en'): string {
   const date = new Date(dateStr);
   const today = new Date();
-  if (date.toDateString() === today.toDateString()) return 'Today';
+  const labels = relativeDateLabels(locale);
+  const bcp47 = localeToBcp47(locale);
+
+  if (date.toDateString() === today.toDateString()) {
+    return labels.today;
+  }
+
   const yesterday = new Date(today);
   yesterday.setDate(yesterday.getDate() - 1);
-  if (date.toDateString() === yesterday.toDateString()) return 'Yesterday';
-  return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric', year: 'numeric' });
+  if (date.toDateString() === yesterday.toDateString()) {
+    return labels.yesterday;
+  }
+
+  return date.toLocaleDateString(bcp47, { month: 'short', day: 'numeric', year: 'numeric' });
 }
 
-export function formatShortDate(dateStr: string): string {
-  return new Date(dateStr).toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+export function formatShortDate(dateStr: string, locale = 'en'): string {
+  return new Date(dateStr).toLocaleDateString(localeToBcp47(locale), { month: 'short', day: 'numeric' });
 }
 
 export function getBudgetColor(percentage: number): 'primary' | 'accent' | 'warn' {

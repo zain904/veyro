@@ -36,6 +36,10 @@
 .transaction-group-card {
   padding: 0 !important;
   overflow: hidden;
+
+  .tx-row {
+    padding-inline: 16px;
+  }
 }
 
 .tx-actions-col {

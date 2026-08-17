@@ -22,6 +22,14 @@ mat-dialog-content {
   padding-top: 8px !important;
 }
 
+mat-dialog-actions button mat-spinner {
+  display: inline-block;
+}
+
+mat-dialog-actions button mat-flat-button {
+  min-width: 88px;
+}
+
 .categories-error {
   display: flex;
   align-items: flex-start;

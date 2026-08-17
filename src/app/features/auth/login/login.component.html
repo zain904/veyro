@@ -4,53 +4,64 @@
     <div class="hero">
       <div class="hero-icon">V</div>
       <h1>Veyro</h1>
-      <p class="tagline">Know where your money goes.</p>
+      <p class="tagline">{{ 'auth.tagline' | translate }}</p>
       <p class="description">
-        Track income, manage expenses, set budgets, and take control of your finances — all in one place.
+        {{ 'auth.description' | translate }}
       </p>
       <div class="features">
         <div class="feature">
           <mat-icon>trending_up</mat-icon>
-          <span>Smart insights</span>
+          <span>{{ 'auth.smartInsights' | translate }}</span>
         </div>
         <div class="feature">
           <mat-icon>account_balance_wallet</mat-icon>
-          <span>Budget tracking</span>
+          <span>{{ 'auth.budgetTracking' | translate }}</span>
         </div>
         <div class="feature">
           <mat-icon>bar_chart</mat-icon>
-          <span>Visual reports</span>
+          <span>{{ 'auth.visualReports' | translate }}</span>
         </div>
       </div>
     </div>
   </div>
 
   <div class="login-right">
+    <div class="lang-select">
+      <mat-form-field appearance="outline" subscriptSizing="dynamic">
+        <mat-label>{{ 'common.language' | translate }}</mat-label>
+        <mat-select [value]="langService.currentLang()" (selectionChange)="onLanguageChange($event.value)">
+          @for (l of langService.languages; track l.code) {
+            <mat-option [value]="l.code">{{ l.nativeLabel }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+
     <mat-card class="login-card">
       @if (emailConfirmationSent()) {
         <div class="confirmation-state">
           <div class="confirmation-icon">
             <mat-icon>mark_email_read</mat-icon>
           </div>
-          <h2>Check your email</h2>
+          <h2>{{ 'auth.checkEmail' | translate }}</h2>
           <p class="subtitle">
-            We sent a verification link to
+            {{ 'auth.verificationSent' | translate }}
             <strong>{{ pendingEmail() }}</strong>.
-            Click the link in that email to activate your account.
+            {{ 'auth.verificationHint' | translate }}
           </p>
 
           <div class="confirmation-steps">
             <div class="step">
               <mat-icon>inbox</mat-icon>
-              <span>Open your inbox</span>
+              <span>{{ 'auth.openInbox' | translate }}</span>
             </div>
             <div class="step">
               <mat-icon>link</mat-icon>
-              <span>Click the verify link</span>
+              <span>{{ 'auth.clickVerify' | translate }}</span>
             </div>
             <div class="step">
               <mat-icon>login</mat-icon>
-              <span>Come back and sign in</span>
+              <span>{{ 'auth.comeBackSignIn' | translate }}</span>
             </div>
           </div>
 
@@ -78,12 +89,12 @@
             @if (resending()) {
               <mat-spinner diameter="18"></mat-spinner>
             } @else {
-              Resend verification email
+              {{ 'auth.resendVerification' | translate }}
             }
           </button>
 
           <button mat-button color="primary" class="back-btn" type="button" (click)="backToSignIn()">
-            Back to sign in
+            {{ 'auth.backToSignIn' | translate }}
           </button>
         </div>
       } @else if (passwordResetSent()) {
@@ -91,16 +102,16 @@
           <div class="confirmation-icon">
             <mat-icon>lock_reset</mat-icon>
           </div>
-          <h2>Reset your password</h2>
+          <h2>{{ 'auth.resetPassword' | translate }}</h2>
           <p class="subtitle">
-            Enter the email for your Veyro account. We'll send a link to set a new password.
+            {{ 'auth.resetHint' | translate }}
             <br><br>
-            <em>For security, your current password cannot be viewed — only reset.</em>
+            <em>{{ 'auth.resetSecurityNote' | translate }}</em>
           </p>
 
           <form [formGroup]="form" (ngSubmit)="sendPasswordReset()">
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Email</mat-label>
+              <mat-label>{{ 'auth.email' | translate }}</mat-label>
               <input matInput formControlName="email" type="email" placeholder="you@example.com">
               <mat-icon matPrefix>email</mat-icon>
             </mat-form-field>
@@ -110,7 +121,7 @@
                 <mat-icon>check_circle</mat-icon>
                 {{ successMessage() }}
                 @if (pendingEmail()) {
-                  <span class="sent-to">Sent to <strong>{{ pendingEmail() }}</strong></span>
+                  <span class="sent-to">{{ 'auth.sentTo' | translate }} <strong>{{ pendingEmail() }}</strong></span>
                 }
               </div>
             }
@@ -131,36 +142,36 @@
               @if (loading()) {
                 <mat-spinner diameter="20"></mat-spinner>
               } @else {
-                Send reset link
+                {{ 'auth.sendResetLink' | translate }}
               }
             </button>
           </form>
 
           <button mat-button color="primary" class="back-btn" type="button" (click)="backFromForgotPassword()">
-            Back to sign in
+            {{ 'auth.backToSignIn' | translate }}
           </button>
         </div>
       } @else {
-        <h2>{{ isSignUp() ? 'Create account' : 'Welcome back' }}</h2>
-        <p class="subtitle">{{ isSignUp() ? 'Start managing your finances today' : 'Sign in to your account' }}</p>
+        <h2>{{ isSignUp() ? ('auth.createAccount' | translate) : ('auth.welcomeBack' | translate) }}</h2>
+        <p class="subtitle">{{ isSignUp() ? ('auth.signUpSubtitle' | translate) : ('auth.signInSubtitle' | translate) }}</p>
 
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
           @if (isSignUp()) {
             <mat-form-field appearance="outline" class="full-width">
-              <mat-label>Full name</mat-label>
+              <mat-label>{{ 'auth.fullName' | translate }}</mat-label>
               <input matInput formControlName="fullName" placeholder="Zain Ahmed">
               <mat-icon matPrefix>person</mat-icon>
             </mat-form-field>
           }
 
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Email</mat-label>
+            <mat-label>{{ 'auth.email' | translate }}</mat-label>
             <input matInput formControlName="email" type="email" placeholder="you@example.com">
             <mat-icon matPrefix>email</mat-icon>
           </mat-form-field>
 
           <mat-form-field appearance="outline" class="full-width">
-            <mat-label>Password</mat-label>
+            <mat-label>{{ 'auth.password' | translate }}</mat-label>
             <input matInput formControlName="password" [type]="hidePassword() ? 'password' : 'text'">
             <mat-icon matPrefix>lock</mat-icon>
             <button mat-icon-button matSuffix type="button" (click)="hidePassword.set(!hidePassword())">
@@ -171,7 +182,7 @@
           @if (!isSignUp()) {
             <div class="forgot-row">
               <button mat-button color="primary" type="button" class="forgot-btn" (click)="showForgotPassword()">
-                Forgot password?
+                {{ 'auth.forgotPassword' | translate }}
               </button>
             </div>
           }
@@ -187,15 +198,15 @@
             @if (loading()) {
               <mat-spinner diameter="20"></mat-spinner>
             } @else {
-              {{ isSignUp() ? 'Create account' : 'Sign in' }}
+              {{ isSignUp() ? ('auth.signUp' | translate) : ('auth.signIn' | translate) }}
             }
           </button>
         </form>
 
         <p class="toggle-mode">
-          {{ isSignUp() ? 'Already have an account?' : "Don't have an account?" }}
+          {{ isSignUp() ? ('auth.alreadyHaveAccount' | translate) : ('auth.noAccount' | translate) }}
           <button mat-button color="primary" type="button" (click)="toggleMode()">
-            {{ isSignUp() ? 'Sign in' : 'Sign up' }}
+            {{ isSignUp() ? ('auth.signIn' | translate) : ('auth.signUp' | translate) }}
           </button>
         </p>
       }

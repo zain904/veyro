@@ -1,6 +1,8 @@
 import {
   Component,
   Input,
+  Output,
+  EventEmitter,
   OnChanges,
   SimpleChanges,
   ElementRef,
@@ -12,15 +14,27 @@ import {
 } from '@angular/core';
 import ApexCharts, { ApexOptions } from 'apexcharts';
 import { ThemeService } from '../../../core/services/theme.service';
+import { EmptyStateComponent } from '../empty-state/empty-state.component';
 
 @Component({
   selector: 'app-chart',
   standalone: true,
+  imports: [EmptyStateComponent],
   template: `
-    @if (empty) {
-      <div class="chart-empty">
-        <span>{{ emptyMessage }}</span>
-      </div>
+    @if (loading) {
+      <div class="chart-skeleton" [style.min-height.px]="minHeight"></div>
+    } @else if (empty) {
+      <app-empty-state
+        [card]="false"
+        [inline]="true"
+        [compact]="true"
+        [icon]="emptyIcon"
+        [title]="emptyTitle"
+        [message]="emptyMessage"
+        [actionLabel]="actionLabel"
+        [actionIcon]="actionIcon"
+        [actionRoute]="actionRoute"
+        (actionClick)="actionClick.emit()" />
     } @else {
       <div #chartContainer class="chart-container" [style.min-height.px]="minHeight"></div>
     }
@@ -35,33 +49,32 @@ import { ThemeService } from '../../../core/services/theme.service';
       width: 100%;
     }
 
-    .chart-empty {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      justify-content: center;
-      gap: 8px;
-      min-height: 220px;
-      color: var(--text-secondary);
-      font-size: 13px;
-      border: 1px dashed var(--border-color);
-      border-radius: 12px;
-      background: var(--hover-color);
+    .chart-skeleton {
+      width: 100%;
+      border-radius: var(--radius-md);
+      background: linear-gradient(90deg, var(--hover-color) 25%, var(--border-color) 50%, var(--hover-color) 75%);
+      background-size: 200% 100%;
+      animation: veyro-shimmer 1.4s infinite;
+    }
 
-      &::before {
-        content: 'bar_chart';
-        font-family: 'Material Icons';
-        font-size: 28px;
-        opacity: 0.35;
-      }
+    @keyframes veyro-shimmer {
+      0% { background-position: 200% 0; }
+      100% { background-position: -200% 0; }
     }
   `],
 })
 export class ChartComponent implements OnChanges, OnDestroy, AfterViewInit {
   @Input() options!: ApexOptions;
   @Input() empty = false;
-  @Input() emptyMessage = 'No data available';
+  @Input() loading = false;
+  @Input() emptyTitle = 'No data yet';
+  @Input() emptyMessage = 'Start adding transactions to see insights here.';
+  @Input() emptyIcon = 'bar_chart';
+  @Input() actionLabel = 'Add Transaction';
+  @Input() actionIcon = 'add';
+  @Input() actionRoute = '/transactions';
   @Input() minHeight = 220;
+  @Output() actionClick = new EventEmitter<void>();
 
   chartContainer = viewChild<ElementRef>('chartContainer');
   private chart: ApexCharts | null = null;
@@ -72,7 +85,7 @@ export class ChartComponent implements OnChanges, OnDestroy, AfterViewInit {
   constructor() {
     effect(() => {
       this.themeService.theme();
-      if (this.viewReady && this.chart && this.options && !this.empty) {
+      if (this.viewReady && this.chart && this.options && !this.empty && !this.loading) {
         this.renderChart(true);
       }
     });
@@ -81,14 +94,14 @@ export class ChartComponent implements OnChanges, OnDestroy, AfterViewInit {
   ngAfterViewInit(): void {
     this.viewReady = true;
     this.setupResizeObserver();
-    if (this.options && !this.empty) {
+    if (this.options && !this.empty && !this.loading) {
       this.renderChart();
     }
   }
 
   ngOnChanges(changes: SimpleChanges): void {
-    if ((changes['options'] || changes['empty']) && this.viewReady) {
-      if (this.empty) {
+    if ((changes['options'] || changes['empty'] || changes['loading']) && this.viewReady) {
+      if (this.empty || this.loading) {
         this.destroyChart();
       } else if (this.options) {
         setTimeout(() => this.renderChart(), 0);
@@ -110,7 +123,7 @@ export class ChartComponent implements OnChanges, OnDestroy, AfterViewInit {
 
   private renderChart(recreate = false): void {
     const container = this.chartContainer()?.nativeElement;
-    if (!container || this.empty) return;
+    if (!container || this.empty || this.loading) return;
 
     const options: ApexOptions = {
       ...this.options,

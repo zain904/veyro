@@ -1,0 +1,114 @@
+<h2 mat-dialog-title class="dialog-title">
+  <mat-icon>calculate</mat-icon>
+  {{ 'quickTools.title' | translate }}
+</h2>
+
+<mat-dialog-content>
+  <mat-tab-group dynamicHeight animationDuration="150ms">
+    <mat-tab [label]="'quickTools.calculator' | translate">
+      <div class="calc-panel">
+        <div class="calc-display" aria-live="polite">{{ display() }}</div>
+        <div class="calc-grid">
+          <button type="button" mat-stroked-button class="calc-btn fn" (click)="clearAll()">AC</button>
+          <button type="button" mat-stroked-button class="calc-btn fn" (click)="backspace()">
+            <mat-icon>backspace</mat-icon>
+          </button>
+          <button type="button" mat-stroked-button class="calc-btn fn" (click)="percentOfDisplay()">%</button>
+          <button type="button" mat-stroked-button class="calc-btn op" (click)="inputOperator('/')">÷</button>
+
+          <button type="button" mat-stroked-button class="calc-btn" (click)="inputDigit('7')">7</button>
+          <button type="button" mat-stroked-button class="calc-btn" (click)="inputDigit('8')">8</button>
+          <button type="button" mat-stroked-button class="calc-btn" (click)="inputDigit('9')">9</button>
+          <button type="button" mat-stroked-button class="calc-btn op" (click)="inputOperator('*')">×</button>
+
+          <button type="button" mat-stroked-button class="calc-btn" (click)="inputDigit('4')">4</button>
+          <button type="button" mat-stroked-button class="calc-btn" (click)="inputDigit('5')">5</button>
+          <button type="button" mat-stroked-button class="calc-btn" (click)="inputDigit('6')">6</button>
+          <button type="button" mat-stroked-button class="calc-btn op" (click)="inputOperator('-')">−</button>
+
+          <button type="button" mat-stroked-button class="calc-btn" (click)="inputDigit('1')">1</button>
+          <button type="button" mat-stroked-button class="calc-btn" (click)="inputDigit('2')">2</button>
+          <button type="button" mat-stroked-button class="calc-btn" (click)="inputDigit('3')">3</button>
+          <button type="button" mat-stroked-button class="calc-btn op" (click)="inputOperator('+')">+</button>
+
+          <button type="button" mat-stroked-button class="calc-btn" (click)="toggleSign()">±</button>
+          <button type="button" mat-stroked-button class="calc-btn" (click)="inputDigit('0')">0</button>
+          <button type="button" mat-stroked-button class="calc-btn" (click)="inputDecimal()">.</button>
+          <button type="button" mat-stroked-button class="calc-btn equals" (click)="calculate()">=</button>
+        </div>
+        <div class="calc-actions">
+          <button mat-stroked-button type="button" (click)="copyResult()">
+            <mat-icon>content_copy</mat-icon>
+            {{ 'common.copy' | translate }}
+          </button>
+          <button mat-flat-button color="primary" type="button" (click)="useInTransaction()" [disabled]="numericDisplay <= 0">
+            <mat-icon>add</mat-icon>
+            {{ 'quickTools.addAsTransaction' | translate }}
+          </button>
+        </div>
+      </div>
+    </mat-tab>
+
+    <mat-tab [label]="'quickTools.tipSplit' | translate">
+      <div class="tool-panel">
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'quickTools.billAmount' | translate }}</mat-label>
+          <input matInput type="number" min="0" [(ngModel)]="billAmount">
+          <span matTextPrefix>{{ currencyService.prefix() }}&nbsp;</span>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'quickTools.tipPercent' | translate }}</mat-label>
+          <input matInput type="number" min="0" [(ngModel)]="tipPercent">
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'quickTools.splitPeople' | translate }}</mat-label>
+          <input matInput type="number" min="1" [(ngModel)]="splitPeople">
+        </mat-form-field>
+        <div class="result-cards">
+          <div class="result-row"><span>{{ 'quickTools.tip' | translate }}</span><strong>{{ tipAmount | veyroCurrency }}</strong></div>
+          <div class="result-row"><span>{{ 'quickTools.totalWithTip' | translate }}</span><strong>{{ billWithTip | veyroCurrency }}</strong></div>
+          <div class="result-row highlight"><span>{{ 'quickTools.perPerson' | translate }}</span><strong>{{ perPerson | veyroCurrency }}</strong></div>
+        </div>
+        <button mat-flat-button color="primary" class="full-btn" type="button" (click)="useInTransaction(perPerson)" [disabled]="perPerson <= 0">
+          <mat-icon>add</mat-icon>
+          {{ 'quickTools.addPerPerson' | translate }}
+        </button>
+      </div>
+    </mat-tab>
+
+    <mat-tab [label]="'quickTools.percentage' | translate">
+      <div class="tool-panel">
+        <p class="tool-hint">{{ 'quickTools.percentHint' | translate }}</p>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'quickTools.amount' | translate }}</mat-label>
+          <input matInput type="number" min="0" [(ngModel)]="percentBase">
+          <span matTextPrefix>{{ currencyService.prefix() }}&nbsp;</span>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'quickTools.percentage' | translate }}</mat-label>
+          <input matInput type="number" min="0" [(ngModel)]="percentRate">
+          <span matTextSuffix>&nbsp;%</span>
+        </mat-form-field>
+        <div class="result-cards">
+          <div class="result-row highlight">
+            <span>{{ 'quickTools.percentOf' | translate: { rate: percentRate, base: (percentBase | veyroCurrency) } }}</span>
+            <strong>{{ percentResult | veyroCurrency }}</strong>
+          </div>
+        </div>
+        <div class="quick-pct">
+          @for (p of [5, 10, 15, 20, 25]; track p) {
+            <button mat-stroked-button type="button" (click)="percentRate = p">{{ p }}%</button>
+          }
+        </div>
+        <button mat-flat-button color="primary" class="full-btn" type="button" (click)="useInTransaction(percentResult)" [disabled]="percentResult <= 0">
+          <mat-icon>add</mat-icon>
+          {{ 'quickTools.addResult' | translate }}
+        </button>
+      </div>
+    </mat-tab>
+  </mat-tab-group>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="close()">{{ 'common.close' | translate }}</button>
+</mat-dialog-actions>

@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { ApexOptions } from 'apexcharts';
 import { ThemeService } from './theme.service';
+import { CurrencyService } from './currency.service';
 
 export interface CategoryChartItem {
   name: string;
@@ -34,11 +35,12 @@ export class ChartBuilderService {
   private readonly expenseColor = '#ef4444';
   private readonly savingsColor = '#3b82f6';
   private readonly netColor = '#14b8a6';
+  private currencyService = inject(CurrencyService);
 
   constructor(private themeService: ThemeService) {}
 
   formatCurrency(value: number): string {
-    return `Rs. ${Math.abs(value).toLocaleString('en-PK', { maximumFractionDigits: 0 })}`;
+    return this.currencyService.format(value);
   }
 
   formatCompact(value: number): string {
@@ -202,7 +204,9 @@ export class ChartBuilderService {
     };
   }
 
-  cashFlowBarChart(income: number, expenses: number): ApexOptions {
+  cashFlowBarChart(income: number, expenses: number): ApexOptions | null {
+    if (income === 0 && expenses === 0) return null;
+
     const p = this.palette();
     const mobile = this.isMobile();
 
@@ -273,7 +277,9 @@ export class ChartBuilderService {
     };
   }
 
-  trendAreaChart(trend: TrendChartItem[]): ApexOptions {
+  trendAreaChart(trend: TrendChartItem[]): ApexOptions | null {
+    if (!trend.length || trend.every(t => t.income === 0 && t.expenses === 0)) return null;
+
     const p = this.palette();
     const netSeries = trend.map(t => t.income - t.expenses);
 
@@ -401,7 +407,7 @@ export class ChartBuilderService {
     };
   }
 
-  incomeExpenseCompareChart(income: number, expenses: number): ApexOptions {
+  incomeExpenseCompareChart(income: number, expenses: number): ApexOptions | null {
     return this.cashFlowBarChart(income, expenses);
   }
 

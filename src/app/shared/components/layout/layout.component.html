@@ -1,4 +1,10 @@
-<mat-sidenav-container class="layout-container" [class.sidebar-collapsed]="sidebarCollapsed() && !isHandset">
+<mat-sidenav-container
+  autosize
+  class="layout-container"
+  [class.sidebar-collapsed]="sidebarCollapsed() && !isHandset"
+  [style.--veyro-sidenav-width.px]="contentOffset"
+  [dir]="isRtl ? 'rtl' : 'ltr'"
+  (dirChange)="syncSidenavLayout()">
   <mat-sidenav
     #drawer
     [mode]="isHandset ? 'over' : 'side'"
@@ -11,7 +17,7 @@
       @if (!sidebarCollapsed() || isHandset) {
         <div class="brand-text">
           <span class="brand-name">Veyro</span>
-          <span class="brand-tagline">Know where your money goes.</span>
+          <span class="brand-tagline">{{ 'layout.tagline' | translate }}</span>
         </div>
       }
     </div>
@@ -21,12 +27,12 @@
         <a mat-list-item
            [routerLink]="item.route"
            routerLinkActive="active"
-           [matTooltip]="sidebarCollapsed() && !isHandset ? item.label : ''"
+           [matTooltip]="sidebarCollapsed() && !isHandset ? (item.labelKey | translate) : ''"
            matTooltipPosition="right"
            (click)="isHandset && drawer.close()">
           <mat-icon matListItemIcon>{{ item.icon }}</mat-icon>
           @if (!sidebarCollapsed() || isHandset) {
-            <span matListItemTitle>{{ item.label }}</span>
+            <span matListItemTitle>{{ item.labelKey | translate }}</span>
           }
         </a>
       }
@@ -38,52 +44,62 @@
           mat-icon-button
           class="collapse-btn"
           (click)="toggleSidebarCollapse()"
-          [matTooltip]="sidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
+          [matTooltip]="sidebarCollapsed() ? ('layout.expandSidebar' | translate) : ('layout.collapseSidebar' | translate)"
           matTooltipPosition="right">
-          <mat-icon>{{ sidebarCollapsed() ? 'chevron_right' : 'chevron_left' }}</mat-icon>
+          <mat-icon>{{ sidebarCollapsed() ? (isRtl ? 'chevron_left' : 'chevron_right') : (isRtl ? 'chevron_right' : 'chevron_left') }}</mat-icon>
         </button>
       </div>
     }
   </mat-sidenav>
 
-  <mat-sidenav-content>
+  <mat-sidenav-content #mainContent>
     <mat-toolbar class="toolbar">
       @if (isHandset) {
-        <button mat-icon-button (click)="drawer.toggle()" aria-label="Open menu">
+        <button mat-icon-button (click)="drawer.toggle()" [attr.aria-label]="'layout.openMenu' | translate">
           <mat-icon>menu</mat-icon>
-        </button>
-      } @else {
-        <button
-          mat-icon-button
-          class="collapse-toolbar-btn"
-          (click)="toggleSidebarCollapse()"
-          [matTooltip]="sidebarCollapsed() ? 'Expand sidebar' : 'Collapse sidebar'"
-          aria-label="Toggle sidebar">
-          <mat-icon>{{ sidebarCollapsed() ? 'menu_open' : 'menu' }}</mat-icon>
         </button>
       }
 
       <span class="toolbar-spacer"></span>
 
-      <button mat-icon-button (click)="toggleTheme()" aria-label="Toggle theme">
+      <button
+        mat-icon-button
+        (click)="openQuickTools()"
+        [matTooltip]="'layout.calculatorTools' | translate"
+        [attr.aria-label]="'layout.calculatorTools' | translate">
+        <mat-icon>calculate</mat-icon>
+      </button>
+
+      <button mat-icon-button (click)="toggleTheme()" [attr.aria-label]="'layout.toggleTheme' | translate">
         <mat-icon>{{ theme.theme() === 'dark' ? 'light_mode' : 'dark_mode' }}</mat-icon>
       </button>
 
-      <button mat-icon-button [matMenuTriggerFor]="userMenu" aria-label="User menu">
-        <mat-icon>account_circle</mat-icon>
+      <button mat-icon-button [matMenuTriggerFor]="userMenu" class="avatar-trigger" [attr.aria-label]="'layout.userMenu' | translate">
+        <app-user-avatar
+          [avatarUrl]="avatarUrl()"
+          [name]="displayName()"
+          [email]="(auth.user$ | async)?.email ?? null"
+          size="sm" />
       </button>
-      <mat-menu #userMenu="matMenu">
+      <mat-menu #userMenu="matMenu" class="user-menu-panel">
         <div class="user-info" mat-menu-item disabled>
-          <span class="user-name">{{ displayName() }}</span>
-          <span class="user-email">{{ (auth.user$ | async)?.email }}</span>
+          <app-user-avatar
+            [avatarUrl]="avatarUrl()"
+            [name]="displayName()"
+            [email]="(auth.user$ | async)?.email ?? null"
+            size="md" />
+          <div class="user-info-text">
+            <span class="user-name">{{ displayName() }}</span>
+            <span class="user-email">{{ (auth.user$ | async)?.email }}</span>
+          </div>
         </div>
         <a mat-menu-item routerLink="/settings">
           <mat-icon>settings</mat-icon>
-          <span>Settings</span>
+          <span>{{ 'nav.settings' | translate }}</span>
         </a>
         <button mat-menu-item (click)="signOut()">
           <mat-icon>logout</mat-icon>
-          <span>Sign out</span>
+          <span>{{ 'layout.signOut' | translate }}</span>
         </button>
       </mat-menu>
     </mat-toolbar>
@@ -93,12 +109,12 @@
         <div class="setup-banner">
           <mat-icon>database</mat-icon>
           <div>
-            <strong>Database setup required</strong>
+            <strong>{{ 'layout.dbSetupTitle' | translate }}</strong>
             <p>{{ db.setupMessage() }}</p>
             <p class="setup-steps">
-              1. Go to <a href="https://supabase.com/dashboard/project/mfvlpmsknlbyjoxtmxqd/sql/new" target="_blank" rel="noopener">Supabase SQL Editor</a><br>
-              2. Copy all content from <code>supabase/schema.sql</code> in your project<br>
-              3. Click <strong>Run</strong>, then refresh this page
+              {{ 'layout.dbSetupStep1' | translate }} <a href="https://supabase.com/dashboard/project/mfvlpmsknlbyjoxtmxqd/sql/new" target="_blank" rel="noopener">Supabase SQL Editor</a><br>
+              {{ 'layout.dbSetupStep2' | translate }}<br>
+              {{ 'layout.dbSetupStep3' | translate }}
             </p>
           </div>
         </div>

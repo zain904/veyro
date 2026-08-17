@@ -1,25 +1,64 @@
 .settings-grid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-  gap: 16px;
+  gap: var(--space-md);
 }
 
 .full-width {
   width: 100%;
-  margin-bottom: 8px;
+  margin-bottom: var(--space-sm);
 }
 
-.save-msg {
+.profile-photo-row {
+  display: flex;
+  align-items: center;
+  gap: var(--space-lg);
+  margin-bottom: var(--space-lg);
+  padding-bottom: var(--space-lg);
+  border-bottom: 1px solid var(--border-color);
+}
+
+.photo-actions {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: var(--space-sm);
+
+  button mat-icon {
+    margin-right: 4px;
+  }
+}
+
+.photo-hint {
+  margin: 0;
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.banner-msg {
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
   font-size: 13px;
-  color: #22c55e;
-  margin: 0 0 12px;
+  margin: 0 0 var(--space-md);
+
+  &.success {
+    background: var(--income-light);
+    color: var(--income-color);
+  }
+
+  &.error {
+    background: var(--expense-light);
+    color: var(--expense-color);
+  }
 }
 
-.theme-row {
+.settings-row {
   display: flex;
   justify-content: space-between;
   align-items: center;
-  gap: 16px;
+  gap: var(--space-md);
+  padding: var(--space-md) 0;
+  border-bottom: 1px solid var(--border-color);
 
   strong {
     display: block;
@@ -31,6 +70,33 @@
     margin: 0;
     font-size: 13px;
     color: var(--text-secondary);
+  }
+}
+
+.status {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+
+  mat-icon {
+    font-size: 16px;
+    width: 16px;
+    height: 16px;
+  }
+
+  &.verified { color: var(--income-color); }
+  &.pending { color: var(--warn-color); }
+}
+
+.action-list {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  padding-top: var(--space-md);
+
+  button {
+    justify-content: flex-start;
+    transition: border-color var(--transition-fast), background-color var(--transition-fast);
   }
 }
 
@@ -55,5 +121,11 @@ button mat-icon {
     text-decoration: none;
 
     &:hover { text-decoration: underline; }
+  }
+}
+
+@media (max-width: 375px) {
+  .settings-grid {
+    grid-template-columns: 1fr;
   }
 }

@@ -1,0 +1,31 @@
+<h2 mat-dialog-title>{{ data.budget ? ('dialogs.budgetEdit' | translate) : ('dialogs.budgetAdd' | translate) }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label class="field-label" for="budget-category">{{ 'dialogs.category' | translate }} <span class="required">*</span></label>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-select id="budget-category" formControlName="categoryId">
+        @for (cat of data.categories; track cat.id) {
+          <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-label" for="budget-amount">{{ 'dialogs.budgetAmount' | translate }} <span class="required">*</span></label>
+    <mat-form-field appearance="outline" class="full-width">
+      <input matInput id="budget-amount" type="number" formControlName="amount" min="1" step="1" placeholder="0">
+      <span matTextPrefix>{{ currencyService.prefix() }}&nbsp;</span>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" mat-dialog-close [disabled]="submitting()">{{ 'common.cancel' | translate }}</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()" [disabled]="submitting()">
+    @if (submitting()) {
+      <mat-spinner diameter="18"></mat-spinner>
+    } @else {
+      {{ 'dialogs.saveBudget' | translate }}
+    }
+  </button>
+</mat-dialog-actions>

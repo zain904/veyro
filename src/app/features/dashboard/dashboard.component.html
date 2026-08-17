@@ -1,129 +1,321 @@
 <div class="dashboard">
-  <div class="veyro-page-header">
-    <div>
-      <nav class="breadcrumbs">
-        <span>Home</span>
-        <mat-icon>chevron_right</mat-icon>
-        <span class="current">Dashboard</span>
-      </nav>
-      <h1>Dashboard</h1>
-      <p class="subtitle">{{ periodLabel }}</p>
+  <!-- Hero -->
+  <section class="dashboard-hero">
+    <div class="hero-profile">
+      <app-user-avatar
+        [avatarUrl]="avatarUrl()"
+        [name]="displayName()"
+        [email]="userEmail()"
+        size="lg" />
+      <div class="hero-text">
+        <p class="hero-greeting">{{ greeting }}</p>
+        <h1>{{ 'dashboard.overview' | translate }}</h1>
+        <p class="hero-subtitle">{{ periodLabel }} · {{ 'dashboard.periodHint' | translate }}</p>
+      </div>
     </div>
-    <div class="header-actions">
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Month</mat-label>
-        <mat-select [(ngModel)]="filterMonth" (ngModelChange)="loadDashboard()">
-          @for (m of months; track m.value) {
-            <mat-option [value]="m.value">{{ m.label }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>Year</mat-label>
-        <mat-select [(ngModel)]="filterYear" (ngModelChange)="loadDashboard()">
-          @for (y of years; track y) {
-            <mat-option [value]="y">{{ y }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-      <a mat-flat-button color="primary" routerLink="/transactions">
+    <div class="hero-actions">
+      <div class="quick-filters">
+        <button
+          mat-stroked-button
+          type="button"
+          [class.active]="activeQuickFilter() === 'this-month'"
+          (click)="applyQuickFilter('this-month')">
+          {{ 'dashboard.thisMonth' | translate }}
+        </button>
+        <button
+          mat-stroked-button
+          type="button"
+          [class.active]="activeQuickFilter() === 'last-month'"
+          (click)="applyQuickFilter('last-month')">
+          {{ 'dashboard.lastMonth' | translate }}
+        </button>
+      </div>
+      <div class="period-controls">
+        <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+          <mat-label>{{ 'common.month' | translate }}</mat-label>
+          <mat-select [(ngModel)]="filterMonth" (ngModelChange)="onPeriodChange()">
+            @for (m of months; track m.value) {
+              <mat-option [value]="m.value">{{ getMonthLabel(m.value) }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+        <mat-form-field appearance="outline" class="filter-field" subscriptSizing="dynamic">
+          <mat-label>{{ 'common.year' | translate }}</mat-label>
+          <mat-select [(ngModel)]="filterYear" (ngModelChange)="onPeriodChange()">
+            @for (y of years; track y) {
+              <mat-option [value]="y">{{ y }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
+      </div>
+      <button mat-flat-button color="primary" class="add-btn" (click)="openAddTransaction()">
         <mat-icon>add</mat-icon>
-        Add Transaction
-      </a>
+        {{ 'dashboard.addTransaction' | translate }}
+      </button>
     </div>
-  </div>
+  </section>
 
   @if (loading()) {
     <div class="skeleton-grid">
       @for (i of [1,2,3,4]; track i) { <div class="skeleton-card"></div> }
     </div>
-  } @else {
+    <div class="skeleton-insights">
+      @for (i of [1,2,3]; track i) { <div class="skeleton-card insight-skeleton"></div> }
+    </div>
+    <div class="skeleton-panel trend-skeleton"></div>
+    <div class="charts-row">
+      @for (i of [1,2,3]; track i) { <div class="skeleton-panel"></div> }
+    </div>
+    <div class="bottom-row">
+      @for (i of [1,2]; track i) { <div class="skeleton-panel tall"></div> }
+    </div>
+  }
+
+  @else if (error()) {
+    <mat-card class="error-card panel-card">
+      <mat-icon>cloud_off</mat-icon>
+      <h3>{{ 'dashboard.errorTitle' | translate }}</h3>
+      <p>{{ error() }}</p>
+      <button mat-flat-button color="primary" (click)="loadDashboard()">{{ 'common.tryAgain' | translate }}</button>
+    </mat-card>
+  }
+
+  @else if (!hasAnyData()) {
+    <mat-card class="welcome-card panel-card">
+      <div class="welcome-icon"><mat-icon>rocket_launch</mat-icon></div>
+      <h2>{{ 'dashboard.welcomeTitle' | translate }}</h2>
+      <p>{{ 'dashboard.welcomeText' | translate }}</p>
+      <div class="welcome-steps">
+        <div class="step"><mat-icon>looks_one</mat-icon><span>{{ 'dashboard.step1' | translate }}</span></div>
+        <div class="step"><mat-icon>looks_two</mat-icon><span>{{ 'dashboard.step2' | translate }}</span></div>
+        <div class="step"><mat-icon>looks_3</mat-icon><span>{{ 'dashboard.step3' | translate }}</span></div>
+      </div>
+      <div class="welcome-actions">
+        <button mat-flat-button color="primary" (click)="openAddTransaction()">
+          <mat-icon>add</mat-icon>
+          {{ 'dashboard.firstTransaction' | translate }}
+        </button>
+        <a mat-stroked-button routerLink="/budgets">{{ 'dashboard.setBudget' | translate }}</a>
+      </div>
+    </mat-card>
+  }
+
+  @else {
+    @if (insights().length > 0) {
+      <section class="insights-row" aria-label="Financial insights">
+        @for (insight of insights(); track insight.title) {
+          @if (insight.route) {
+            <a mat-card class="insight-card veyro-card" [class]="insight.tone" [routerLink]="insight.route">
+              <mat-icon>{{ insight.icon }}</mat-icon>
+              <div>
+                <span class="insight-title">{{ insight.title }}</span>
+                <span class="insight-msg">{{ insight.message }}</span>
+              </div>
+            </a>
+          } @else {
+            <mat-card class="insight-card veyro-card" [class]="insight.tone">
+              <mat-icon>{{ insight.icon }}</mat-icon>
+              <div>
+                <span class="insight-title">{{ insight.title }}</span>
+                <span class="insight-msg">{{ insight.message }}</span>
+              </div>
+            </mat-card>
+          }
+        }
+      </section>
+    }
+
+    @if (budgetAlerts().length > 0) {
+      <div class="alert-banner">
+        <mat-icon>notifications_active</mat-icon>
+        <span>
+          @if (budgetAlerts().length === 1) {
+            {{ 'dashboard.budgetAlert' | translate: { count: budgetAlerts().length } }}
+          } @else {
+            {{ 'dashboard.budgetAlertPlural' | translate: { count: budgetAlerts().length } }}
+          }
+          —
+          <a routerLink="/budgets">{{ 'dashboard.reviewBudgets' | translate }}</a>
+        </span>
+      </div>
+    }
+
     <div class="kpi-row">
-      <mat-card class="kpi-card income">
+      <mat-card class="kpi-card income clickable" (click)="navigateToTransactions('income')" tabindex="0" role="button">
         <div class="kpi-top">
           <div class="kpi-icon"><mat-icon>trending_up</mat-icon></div>
-          <span class="change-badge" [class.up]="changeLabel(incomeChange()).positive" [class.down]="!changeLabel(incomeChange()).positive">
-            {{ changeLabel(incomeChange()).text }}
-          </span>
+          @if (incomeChange(); as change) {
+            <span class="change-badge" [class.up]="change.positive" [class.down]="!change.positive">
+              <mat-icon>{{ change.positive ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+              {{ change.label }}
+            </span>
+          }
         </div>
-        <span class="kpi-label">Total Income</span>
+        <span class="kpi-label">{{ 'dashboard.totalIncome' | translate }}</span>
         <span class="kpi-value">{{ totalIncome() | veyroCurrency }}</span>
-        <span class="kpi-hint">vs last month</span>
+        <span class="kpi-hint">{{ incomeChange() ? ('dashboard.vsLastMonth' | translate) : ('dashboard.noPriorData' | translate) }}</span>
       </mat-card>
 
-      <mat-card class="kpi-card expense">
+      <mat-card class="kpi-card expense clickable" (click)="navigateToTransactions('expense')" tabindex="0" role="button">
         <div class="kpi-top">
           <div class="kpi-icon"><mat-icon>trending_down</mat-icon></div>
-          <span class="change-badge" [class.up]="changeLabel(expenseChange(), true).positive" [class.down]="!changeLabel(expenseChange(), true).positive">
-            {{ changeLabel(expenseChange()).text }}
-          </span>
+          @if (expenseChange(); as change) {
+            <span class="change-badge" [class.up]="change.positive" [class.down]="!change.positive">
+              <mat-icon>{{ change.positive ? 'arrow_downward' : 'arrow_upward' }}</mat-icon>
+              {{ change.label }}
+            </span>
+          }
         </div>
-        <span class="kpi-label">Total Expenses</span>
+        <span class="kpi-label">{{ 'dashboard.totalExpenses' | translate }}</span>
         <span class="kpi-value">{{ totalExpenses() | veyroCurrency }}</span>
-        <span class="kpi-hint">vs last month</span>
+        <span class="kpi-hint">{{ expenseChange() ? ('dashboard.vsLastMonth' | translate) : ('dashboard.noPriorData' | translate) }}</span>
       </mat-card>
 
-      <mat-card class="kpi-card net">
+      <mat-card class="kpi-card net clickable" (click)="navigateToTransactions()" tabindex="0" role="button">
         <div class="kpi-top">
           <div class="kpi-icon"><mat-icon>account_balance</mat-icon></div>
-          <span class="change-badge" [class.up]="changeLabel(netChange()).positive" [class.down]="!changeLabel(netChange()).positive">
-            {{ changeLabel(netChange()).text }}
-          </span>
+          @if (netChange(); as change) {
+            <span class="change-badge" [class.up]="change.positive" [class.down]="!change.positive">
+              <mat-icon>{{ change.positive ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+              {{ change.label }}
+            </span>
+          }
         </div>
-        <span class="kpi-label">Net Balance</span>
+        <span class="kpi-label">{{ 'dashboard.netBalance' | translate }}</span>
         <span class="kpi-value" [class.negative]="balance() < 0">{{ balance() | veyroCurrency }}</span>
-        <span class="kpi-hint">Income − Expenses</span>
+        <span class="kpi-hint">{{ netChange() ? ('dashboard.vsLastMonth' | translate) : ('dashboard.incomeMinusExpenses' | translate) }}</span>
       </mat-card>
 
-      <mat-card class="kpi-card savings">
+      <mat-card class="kpi-card savings clickable" (click)="navigateToTransactions()" tabindex="0" role="button">
         <div class="kpi-top">
           <div class="kpi-icon"><mat-icon>savings</mat-icon></div>
+          @if (savingsChange(); as change) {
+            <span class="change-badge" [class.up]="change.positive" [class.down]="!change.positive">
+              <mat-icon>{{ change.positive ? 'arrow_upward' : 'arrow_downward' }}</mat-icon>
+              {{ change.label }}
+            </span>
+          }
         </div>
-        <span class="kpi-label">Savings Rate</span>
+        <span class="kpi-label">{{ 'dashboard.savingsRate' | translate }}</span>
         <span class="kpi-value">{{ savingsRate() }}%</span>
-        <span class="kpi-hint">{{ balance() | veyroCurrency }} saved</span>
+        <span class="kpi-hint">{{ 'dashboard.savedAmount' | translate: { amount: (balance() | veyroCurrency) } }}</span>
       </mat-card>
     </div>
+
+    @if (totalBudget() > 0) {
+      <div class="kpi-row budget-summary-row">
+        <mat-card class="kpi-card neutral clickable" routerLink="/budgets">
+          <span class="kpi-label">{{ 'dashboard.totalBudget' | translate }}</span>
+          <span class="kpi-value">{{ totalBudget() | veyroCurrency }}</span>
+          <span class="kpi-hint">{{ 'dashboard.categoriesTracked' | translate: { count: allBudgetsCount() } }}</span>
+        </mat-card>
+        <mat-card class="kpi-card expense">
+          <span class="kpi-label">{{ 'dashboard.budgetUsed' | translate }}</span>
+          <span class="kpi-value">{{ totalBudgetSpent() | veyroCurrency }}</span>
+          <span class="kpi-hint">{{ 'dashboard.percentOfTotal' | translate: { percent: totalBudget() > 0 ? Math.round((totalBudgetSpent() / totalBudget()) * 100) : 0 } }}</span>
+        </mat-card>
+        <mat-card class="kpi-card net">
+          <span class="kpi-label">{{ 'dashboard.budgetRemaining' | translate }}</span>
+          <span class="kpi-value" [class.negative]="totalBudgetRemaining() < 0">{{ totalBudgetRemaining() | veyroCurrency }}</span>
+          <span class="kpi-hint">{{ 'dashboard.leftToSpend' | translate }}</span>
+        </mat-card>
+      </div>
+    }
+
+    <mat-card class="panel-card trend-panel">
+      <div class="panel-header">
+        <div>
+          <h3>{{ 'dashboard.trendTitle' | translate }}</h3>
+          <span class="hint">{{ 'dashboard.trendHint' | translate }}</span>
+        </div>
+        <a mat-button color="primary" routerLink="/reports">{{ 'dashboard.fullReports' | translate }}</a>
+      </div>
+      <app-chart
+        [options]="trendChartOptions()!"
+        [empty]="!trendChartOptions()"
+        [emptyTitle]="'dashboard.emptyTrendTitle' | translate"
+        [emptyMessage]="'dashboard.emptyTrendMessage' | translate"
+        emptyIcon="show_chart"
+        [actionLabel]="'dashboard.addTransaction' | translate"
+        (actionClick)="openAddTransaction()" />
+    </mat-card>
 
     <div class="charts-row">
       <mat-card class="panel-card">
         <div class="panel-header">
-          <div><h3>Expense Breakdown</h3><span class="hint">By category</span></div>
+          <div><h3>{{ 'dashboard.expenseBreakdown' | translate }}</h3><span class="hint">{{ 'dashboard.byCategory' | translate: { period: periodLabel } }}</span></div>
         </div>
-        <app-chart [options]="expenseChartOptions()!" [empty]="!expenseChartOptions()" emptyMessage="No expenses this month" />
+        <app-chart
+          [options]="expenseChartOptions()!"
+          [empty]="!expenseChartOptions()"
+          [emptyTitle]="'dashboard.emptyExpensesTitle' | translate"
+          [emptyMessage]="'dashboard.emptyExpensesMessage' | translate"
+          emptyIcon="donut_large"
+          [actionLabel]="'dashboard.addTransaction' | translate"
+          (actionClick)="openAddTransaction()" />
       </mat-card>
 
       <mat-card class="panel-card">
-        <div class="panel-header"><div><h3>Cash Flow</h3><span class="hint">Income vs expenses</span></div></div>
-        @if (cashFlowChartOptions()) { <app-chart [options]="cashFlowChartOptions()!" /> }
+        <div class="panel-header">
+          <div><h3>{{ 'dashboard.dailySpending' | translate }}</h3><span class="hint">{{ 'dashboard.dayByDay' | translate }}</span></div>
+        </div>
+        <app-chart
+          [options]="dailyChartOptions()!"
+          [empty]="!dailyChartOptions()"
+          [emptyTitle]="'dashboard.emptyDailyTitle' | translate"
+          [emptyMessage]="'dashboard.emptyDailyMessage' | translate"
+          emptyIcon="timeline"
+          [actionLabel]="'dashboard.addTransaction' | translate"
+          (actionClick)="openAddTransaction()" />
       </mat-card>
 
-      <mat-card class="panel-card">
-        <div class="panel-header"><div><h3>Daily Spending</h3><span class="hint">This month</span></div></div>
-        <app-chart [options]="dailyChartOptions()!" [empty]="!dailyChartOptions()" emptyMessage="No daily data yet" />
+      <mat-card class="panel-card gauge-panel">
+        <div class="panel-header">
+          <div><h3>{{ 'dashboard.savingsRate' | translate }}</h3><span class="hint">{{ 'dashboard.savingsGaugeHint' | translate }}</span></div>
+        </div>
+        <app-chart
+          [options]="savingsGaugeOptions()!"
+          [empty]="!savingsGaugeOptions()"
+          [emptyTitle]="'dashboard.emptySavingsTitle' | translate"
+          [emptyMessage]="'dashboard.emptySavingsMessage' | translate"
+          emptyIcon="savings"
+          [actionLabel]="'dashboard.addTransaction' | translate"
+          (actionClick)="openAddTransaction()" />
       </mat-card>
     </div>
 
     <div class="bottom-row">
       <mat-card class="panel-card">
         <div class="panel-header">
-          <h3>Budget Progress</h3>
-          <a mat-button color="primary" routerLink="/budgets">View all</a>
+          <h3>{{ 'dashboard.budgetOverview' | translate }}</h3>
+          <a mat-button color="primary" routerLink="/budgets">{{ 'dashboard.viewAll' | translate }}</a>
         </div>
         @if (budgets().length === 0) {
-          <div class="empty-panel"><mat-icon>account_balance_wallet</mat-icon><p>No budgets set</p>
-            <a mat-stroked-button color="primary" routerLink="/budgets">Set budgets</a></div>
+          <app-empty-state
+            [card]="false"
+            [inline]="true"
+            [compact]="true"
+            icon="account_balance_wallet"
+            [title]="'dashboard.emptyBudgetTitle' | translate"
+            [message]="'dashboard.emptyBudgetMessage' | translate"
+            [actionLabel]="'budgets.setBudget' | translate"
+            actionRoute="/budgets" />
         } @else {
           @for (budget of budgets(); track budget.id) {
-            <div class="budget-item">
+            <div class="budget-item" [class.alert]="(budget.percentage ?? 0) >= 90" [class.over]="(budget.percentage ?? 0) > 100">
               <div class="budget-head">
-                <span>{{ budget.category?.name }}</span>
-                <span [class.over]="(budget.percentage ?? 0) > 100">{{ budget.percentage }}%</span>
+                <div class="budget-label">
+                  <div class="cat-icon-sm" [style.background]="(budget.category?.color ?? '#64748b') + '22'" [style.color]="budget.category?.color">
+                    <mat-icon>{{ budget.category?.icon || 'category' }}</mat-icon>
+                  </div>
+                  <span>{{ budget.category?.name }}</span>
+                </div>
+                <span class="budget-pct" [class.over]="(budget.percentage ?? 0) > 100">{{ budget.percentage }}%</span>
               </div>
               <mat-progress-bar mode="determinate" [value]="Math.min(budget.percentage ?? 0, 100)" [color]="getBudgetColor(budget.percentage ?? 0)" />
               <div class="budget-meta">
-                <span>{{ budget.spent | veyroCurrency }} spent</span>
-                <span>of {{ budget.amount | veyroCurrency }}</span>
+                <span>{{ 'budgets.spentOf' | translate: { spent: (budget.spent | veyroCurrency) } }}</span>
+                <span>{{ 'budgets.ofAmount' | translate: { amount: (budget.amount | veyroCurrency) } }}</span>
               </div>
             </div>
           }
@@ -132,25 +324,38 @@
 
       <mat-card class="panel-card">
         <div class="panel-header">
-          <h3>Recent Transactions</h3>
-          <a mat-button color="primary" routerLink="/transactions">View all</a>
+          <h3>{{ 'dashboard.recentActivity' | translate }}</h3>
+          <a mat-button color="primary" routerLink="/transactions">{{ 'dashboard.viewAll' | translate }}</a>
         </div>
-        @if (recentTransactions().length === 0) {
-          <div class="empty-panel"><mat-icon>receipt_long</mat-icon><p>No transactions this month</p></div>
+        @if (recentAllTime().length === 0) {
+          <app-empty-state
+            [card]="false"
+            [inline]="true"
+            [compact]="true"
+            icon="receipt_long"
+            [title]="'dashboard.emptyRecentTitle' | translate"
+            [message]="'dashboard.emptyRecentMessage' | translate"
+            [actionLabel]="'dashboard.addTransaction' | translate"
+            (actionClick)="openAddTransaction()" />
         } @else {
-          @for (tx of recentTransactions(); track tx.id) {
-            <div class="tx-row">
+          @if (!monthHasActivity) {
+            <p class="month-note">{{ 'dashboard.emptyRecentTitle' | translate }} {{ periodLabel }}</p>
+          }
+          @for (tx of (monthHasActivity ? recentTransactions() : recentAllTime()); track tx.id) {
+            <button type="button" class="tx-row tx-clickable" (click)="openEditTransaction(tx)">
               <div class="tx-icon-sm" [style.background]="(tx.category?.color ?? '#64748b') + '22'" [style.color]="tx.category?.color">
                 <mat-icon>{{ tx.category?.icon || 'receipt' }}</mat-icon>
               </div>
               <div class="tx-info-col">
                 <span class="name">{{ tx.category?.name || 'Transaction' }}</span>
                 <span class="meta">{{ formatDate(tx.transaction_date) }}</span>
+                <span class="type-badge" [class.expense]="tx.type === 'expense'" [class.income]="tx.type === 'income'">{{ tx.type === 'income' ? ('common.income' | translate) : ('common.expense' | translate) }}</span>
               </div>
               <span class="tx-amt" [class.income]="tx.type === 'income'" [class.expense]="tx.type === 'expense'">
                 {{ tx.type === 'income' ? '+' : '−' }} {{ tx.amount | veyroCurrency }}
               </span>
-            </div>
+              <mat-icon class="tx-chevron">chevron_right</mat-icon>
+            </button>
           }
         }
       </mat-card>

@@ -2,75 +2,145 @@
   <div class="veyro-page-header">
     <div>
       <nav class="breadcrumbs">
-        <span>Home</span>
+        <span>{{ 'common.home' | translate }}</span>
         <mat-icon>chevron_right</mat-icon>
-        <span class="current">Settings</span>
+        <span class="current">{{ 'settings.title' | translate }}</span>
       </nav>
-      <h1>Settings</h1>
-      <p class="subtitle">Manage your account and preferences</p>
+      <h1>{{ 'settings.title' | translate }}</h1>
+      <p class="subtitle">{{ 'settings.subtitle' | translate }}</p>
     </div>
   </div>
 
   @if (loading()) {
     <div class="skeleton-grid">
-      @for (i of [1,2]; track i) { <div class="skeleton-card"></div> }
+      @for (i of [1,2,3]; track i) { <div class="skeleton-card"></div> }
     </div>
   } @else {
+    @if (message()) {
+      <p class="banner-msg success">{{ message() }}</p>
+    }
+    @if (errorMessage()) {
+      <p class="banner-msg error">{{ errorMessage() }}</p>
+    }
+
     <div class="settings-grid">
-      <mat-card class="panel-card">
+      <mat-card class="panel-card veyro-card profile-card">
         <div class="panel-header">
-          <h3>Profile</h3>
+          <h3>{{ 'settings.profile' | translate }}</h3>
           <span class="hint">{{ (auth.user$ | async)?.email }}</span>
         </div>
+
+        <div class="profile-photo-row">
+          <app-user-avatar
+            [avatarUrl]="avatarUrl()"
+            [name]="fullName || displayNameFallback()"
+            [email]="(auth.user$ | async)?.email ?? null"
+            size="xl" />
+          <div class="photo-actions">
+            <input
+              #avatarInput
+              type="file"
+              accept="image/jpeg,image/png,image/webp"
+              hidden
+              (change)="onAvatarSelected($event)">
+            <button mat-stroked-button type="button" (click)="avatarInput.click()" [disabled]="uploadingAvatar()">
+              <mat-icon>photo_camera</mat-icon>
+              {{ 'settings.changePhoto' | translate }}
+            </button>
+            @if (avatarUrl()) {
+              <button mat-button type="button" color="warn" (click)="removeAvatar()" [disabled]="uploadingAvatar()">
+                {{ 'common.remove' | translate }}
+              </button>
+            }
+            <p class="photo-hint">{{ 'settings.photoHint' | translate }}</p>
+          </div>
+        </div>
+
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Full name</mat-label>
+          <mat-label>{{ 'settings.fullName' | translate }}</mat-label>
           <input matInput [(ngModel)]="fullName">
         </mat-form-field>
         <mat-form-field appearance="outline" class="full-width">
-          <mat-label>Currency</mat-label>
-          <input matInput [value]="profile()?.currency ?? 'PKR'" disabled>
+          <mat-label>{{ 'settings.currency' | translate }}</mat-label>
+          <mat-select [(ngModel)]="selectedCurrency">
+            @for (c of currencies; track c.code) {
+              <mat-option [value]="c.code">{{ c.label }}</mat-option>
+            }
+          </mat-select>
         </mat-form-field>
-        @if (message()) {
-          <p class="save-msg">{{ message() }}</p>
-        }
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'settings.language' | translate }}</mat-label>
+          <mat-select [(ngModel)]="selectedLanguage" (ngModelChange)="onLanguageChange($event)">
+            @for (l of langService.languages; track l.code) {
+              <mat-option [value]="l.code">{{ l.nativeLabel }}</mat-option>
+            }
+          </mat-select>
+        </mat-form-field>
         <button mat-flat-button color="primary" (click)="saveProfile()" [disabled]="saving()">
-          Save profile
+          {{ 'settings.saveProfile' | translate }}
         </button>
       </mat-card>
 
-      <mat-card class="panel-card">
+      <mat-card class="panel-card veyro-card">
         <div class="panel-header">
-          <h3>Appearance</h3>
-          <span class="hint">Theme preference</span>
+          <h3>{{ 'settings.appearanceAccount' | translate }}</h3>
+          <span class="hint">{{ 'settings.appearanceHint' | translate }}</span>
         </div>
-        <div class="theme-row">
+
+        <div class="settings-row">
           <div>
-            <strong>Dark mode</strong>
-            <p>Switch between light and dark themes</p>
+            <strong>{{ 'settings.darkMode' | translate }}</strong>
+            <p>{{ 'settings.darkModeHint' | translate }}</p>
           </div>
           <mat-slide-toggle
             [checked]="theme.theme() === 'dark'"
             (change)="toggleTheme()">
           </mat-slide-toggle>
         </div>
+
+        <div class="settings-row">
+          <div>
+            <strong>{{ 'settings.emailVerification' | translate }}</strong>
+            <p>
+              @if (isEmailVerified(auth.currentUser)) {
+                <span class="status verified"><mat-icon>verified</mat-icon> {{ 'settings.verified' | translate }}</span>
+              } @else {
+                <span class="status pending"><mat-icon>schedule</mat-icon> {{ 'settings.pendingVerification' | translate }}</span>
+              }
+            </p>
+          </div>
+        </div>
+
+        <div class="action-list">
+          <button mat-stroked-button (click)="changePassword(auth.currentUser?.email)">
+            <mat-icon>lock_reset</mat-icon>
+            {{ 'settings.changePassword' | translate }}
+          </button>
+          <button mat-stroked-button (click)="exportData('csv')" [disabled]="exporting()">
+            <mat-icon>download</mat-icon>
+            {{ 'settings.exportCsv' | translate }}
+          </button>
+          <button mat-stroked-button (click)="exportData('json')" [disabled]="exporting()">
+            <mat-icon>data_object</mat-icon>
+            {{ 'settings.exportJson' | translate }}
+          </button>
+          <button mat-stroked-button color="warn" (click)="deleteAccountData()">
+            <mat-icon>delete_forever</mat-icon>
+            {{ 'settings.deleteData' | translate }}
+          </button>
+          <button mat-stroked-button color="warn" (click)="signOut()">
+            <mat-icon>logout</mat-icon>
+            {{ 'layout.signOut' | translate }}
+          </button>
+        </div>
       </mat-card>
 
-      <mat-card class="panel-card">
+      <mat-card class="panel-card veyro-card">
         <div class="panel-header">
-          <h3>Account</h3>
+          <h3>{{ 'settings.aboutTitle' | translate }}</h3>
+          <span class="hint">{{ 'settings.aboutHint' | translate }}</span>
         </div>
-        <button mat-stroked-button color="warn" (click)="auth.signOut()">
-          <mat-icon>logout</mat-icon>
-          Sign out
-        </button>
-      </mat-card>
-
-      <mat-card class="panel-card">
-        <div class="panel-header">
-          <h3>About Veyro</h3>
-          <span class="hint">App information</span>
-        </div>
-        <p class="about-text">Know where your money goes.</p>
+        <p class="about-text">{{ 'settings.aboutText' | translate }}</p>
         <p class="about-meta">
           {{ copyright }}<br>
           <strong>{{ author.name }}</strong><br>

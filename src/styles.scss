@@ -23,6 +23,11 @@ html {
   --primary-color: #0d9488;
   --primary-light: rgba(13, 148, 136, 0.1);
   --accent-color: #14b8a6;
+  --income-color: #22c55e;
+  --income-light: rgba(34, 197, 94, 0.12);
+  --expense-color: #ef4444;
+  --expense-light: rgba(239, 68, 68, 0.12);
+  --warn-color: #f59e0b;
   --bg-color: #f8fafc;
   --surface-color: #ffffff;
   --surface-elevated: #ffffff;
@@ -33,6 +38,17 @@ html {
   --card-shadow: 0 1px 3px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
   --dialog-scrim: rgba(15, 23, 42, 0.5);
   --btn-primary-text: #ffffff;
+  --radius-sm: 8px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --space-xs: 4px;
+  --space-sm: 8px;
+  --space-md: 16px;
+  --space-lg: 24px;
+  --space-xl: 32px;
+  --transition-fast: 150ms ease;
+  --transition-normal: 200ms ease;
+  --focus-ring: 0 0 0 3px rgba(13, 148, 136, 0.35);
 }
 
 body.dark-theme {
@@ -52,6 +68,11 @@ body.dark-theme {
     --card-shadow: 0 4px 16px rgba(0, 0, 0, 0.35);
     --dialog-scrim: rgba(0, 0, 0, 0.65);
     --btn-primary-text: #042f2e;
+    --income-color: #4ade80;
+    --income-light: rgba(74, 222, 128, 0.15);
+    --expense-color: #f87171;
+    --expense-light: rgba(248, 113, 113, 0.15);
+    --focus-ring: 0 0 0 3px rgba(45, 212, 191, 0.35);
 
     color-scheme: dark;
   }
@@ -71,6 +92,19 @@ body {
   background: var(--bg-color);
   color: var(--text-primary);
   -webkit-font-smoothing: antialiased;
+}
+
+.mat-calendar-body-selected {
+  background-color: var(--primary-color) !important;
+  color: var(--btn-primary-text) !important;
+}
+
+.mat-calendar-body-today:not(.mat-calendar-body-selected) {
+  border-color: var(--primary-color) !important;
+}
+
+.veyro-datepicker .mat-calendar-body-cell:not(.mat-calendar-body-disabled):hover > .mat-calendar-body-cell-content {
+  background: var(--primary-light);
 }
 
 // ── Cards ──────────────────────────────────────────────
@@ -203,6 +237,18 @@ body {
 // ── Buttons ─────────────────────────────────────────────
 .mat-mdc-button, .mat-mdc-raised-button, .mat-mdc-flat-button, .mat-mdc-stroked-button {
   border-radius: 10px !important;
+  transition: background-color var(--transition-fast), color var(--transition-fast), border-color var(--transition-fast), transform var(--transition-fast) !important;
+}
+
+.mat-mdc-icon-button {
+  transition: background-color var(--transition-fast), color var(--transition-fast) !important;
+}
+
+.mat-mdc-button-base:focus-visible,
+.mat-mdc-icon-button:focus-visible,
+a.mat-mdc-list-item:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
 }
 
 .mat-mdc-button:not(:disabled) {
@@ -267,4 +313,28 @@ body {
 ::-webkit-scrollbar-thumb {
   background: var(--border-color);
   border-radius: 3px;
+}
+
+html[dir='rtl'] {
+  .veyro-page-header .header-actions { flex-direction: row-reverse; }
+
+  .tx-row {
+    direction: rtl;
+  }
+
+  .tx-info-col {
+    text-align: start;
+  }
+
+  .tx-amt {
+    direction: ltr;
+    unicode-bidi: isolate;
+  }
+
+  .kpi-value,
+  .kpi-hint {
+    direction: ltr;
+    unicode-bidi: isolate;
+    text-align: end;
+  }
 }

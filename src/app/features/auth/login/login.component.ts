@@ -6,7 +6,11 @@ import { MatInputModule } from '@angular/material/input';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatProgressSpinnerModule } from '@angular/material/progress-spinner';
+import { MatSelectModule } from '@angular/material/select';
+import { TranslatePipe } from '@ngx-translate/core';
 import { AuthService } from '../../../core/services/auth.service';
+import { LanguageService } from '../../../core/services/language.service';
+import { AppLanguage } from '../../../core/utils/locale.util';
 import { AppFooterComponent } from '../../../shared/components/footer/app-footer.component';
 
 @Component({
@@ -20,6 +24,8 @@ import { AppFooterComponent } from '../../../shared/components/footer/app-footer
     MatButtonModule,
     MatIconModule,
     MatProgressSpinnerModule,
+    MatSelectModule,
+    TranslatePipe,
     AppFooterComponent,
   ],
   templateUrl: './login.component.html',
@@ -28,6 +34,7 @@ import { AppFooterComponent } from '../../../shared/components/footer/app-footer
 export class LoginComponent {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
+  langService = inject(LanguageService);
 
   isSignUp = signal(false);
   loading = signal(false);
@@ -44,6 +51,10 @@ export class LoginComponent {
     email: ['', [Validators.required, Validators.email]],
     password: ['', [Validators.required, Validators.minLength(6)]],
   });
+
+  async onLanguageChange(code: AppLanguage): Promise<void> {
+    await this.langService.setLanguage(code, false);
+  }
 
   toggleMode(): void {
     this.isSignUp.update(v => !v);

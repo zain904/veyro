@@ -133,8 +133,8 @@
   }
 }
 
-.income .kpi-icon { background: rgba(34, 197, 94, 0.12); mat-icon { color: #22c55e; } }
-.expense .kpi-icon { background: rgba(239, 68, 68, 0.12); mat-icon { color: #ef4444; } }
+.income .kpi-icon { background: var(--income-light); mat-icon { color: var(--income-color); } }
+.expense .kpi-icon { background: var(--expense-light); mat-icon { color: var(--expense-color); } }
 .net .kpi-icon { background: rgba(59, 130, 246, 0.12); mat-icon { color: #3b82f6; } }
 
 .change-badge {
@@ -142,9 +142,19 @@
   font-weight: 600;
   padding: 4px 8px;
   border-radius: 20px;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
 
-  &.up { background: rgba(34, 197, 94, 0.15); color: #22c55e; }
-  &.down { background: rgba(239, 68, 68, 0.15); color: #ef4444; }
+  mat-icon {
+    font-size: 14px;
+    width: 14px;
+    height: 14px;
+  }
+
+  &.up { background: var(--income-light); color: var(--income-color); }
+  &.down { background: var(--expense-light); color: var(--expense-color); }
+  &.neutral { background: var(--hover-color); color: var(--text-secondary); }
 }
 
 .kpi-label {
@@ -160,7 +170,7 @@
   color: var(--text-primary);
   margin-top: 4px;
 
-  &.negative { color: #ef4444; }
+  &.negative { color: var(--expense-color); }
 }
 
 .kpi-hint {
@@ -253,6 +263,10 @@
     font-size: 12px;
     color: var(--text-secondary);
   }
+
+  .type-badge {
+    margin-top: 6px;
+  }
 }
 
 .tx-amt {
@@ -260,6 +274,78 @@
   font-weight: 600;
   white-space: nowrap;
 
-  &.income { color: #22c55e; }
-  &.expense { color: #ef4444; }
+  &.income { color: var(--income-color); }
+  &.expense { color: var(--expense-color); }
+}
+
+// ── Shared card patterns (Categories reference) ───────
+.veyro-card {
+  padding: 20px !important;
+  border-radius: var(--radius-lg) !important;
+  border: 1px solid var(--border-color) !important;
+  background: var(--surface-color) !important;
+  transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
+
+  &:hover {
+    border-color: color-mix(in srgb, var(--primary-color) 30%, var(--border-color));
+  }
+}
+
+.type-badge {
+  font-size: 10px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  padding: 4px 8px;
+  border-radius: 20px;
+
+  &.expense {
+    background: var(--expense-light);
+    color: var(--expense-color);
+  }
+
+  &.income {
+    background: var(--income-light);
+    color: var(--income-color);
+  }
+}
+
+.cat-icon-sm {
+  width: 40px;
+  height: 40px;
+  border-radius: var(--radius-md);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+
+  mat-icon { font-size: 20px; width: 20px; height: 20px; }
+}
+
+.field-label {
+  display: block;
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-primary);
+  margin-bottom: 6px;
+
+  .required {
+    color: var(--expense-color);
+  }
+}
+
+.field-error {
+  display: block;
+  font-size: 12px;
+  color: var(--expense-color);
+  margin: -2px 0 10px;
+}
+
+.skeleton-panel {
+  height: 280px;
+  border-radius: var(--radius-lg);
+  background: linear-gradient(90deg, var(--hover-color) 25%, var(--border-color) 50%, var(--hover-color) 75%);
+  background-size: 200% 100%;
+  animation: veyro-shimmer 1.4s infinite;
+  margin-bottom: var(--space-md);
 }

@@ -1,14 +1,16 @@
 import { Component, Input } from '@angular/core';
+import { TranslatePipe } from '@ngx-translate/core';
 import { APP_AUTHOR, appCopyright } from '../../../core/constants/app.constants';
 
 @Component({
   selector: 'app-footer',
   standalone: true,
+  imports: [TranslatePipe],
   template: `
     <footer class="app-footer" [class.compact]="compact">
       <p class="copyright">{{ copyright }}</p>
       <p class="author">
-        Built by <strong>{{ author.name }}</strong>
+        {{ 'footer.builtBy' | translate }} <strong>{{ author.name }}</strong>
         ·
         <a [href]="'mailto:' + author.email">{{ author.email }}</a>
       </p>
