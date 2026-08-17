@@ -54,6 +54,18 @@ export class AuthService {
     return this.supabase.resendConfirmationEmail(email);
   }
 
+  async requestPasswordReset(email: string): Promise<AuthResult> {
+    return this.supabase.resetPasswordForEmail(email);
+  }
+
+  async updatePassword(newPassword: string): Promise<AuthResult> {
+    const result = await this.supabase.updatePassword(newPassword);
+    if (!result.error) {
+      this.router.navigate(['/dashboard']);
+    }
+    return result;
+  }
+
   async signOut(): Promise<void> {
     await this.supabase.signOut();
     this.router.navigate(['/login']);

@@ -3,6 +3,7 @@
     #drawer
     [mode]="isHandset ? 'over' : 'side'"
     [opened]="!isHandset"
+    [style.width.px]="sidenavWidth"
     class="sidenav"
     [class.collapsed]="sidebarCollapsed() && !isHandset">
     <div class="brand">

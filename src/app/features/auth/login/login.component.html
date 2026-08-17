@@ -86,6 +86,60 @@
             Back to sign in
           </button>
         </div>
+      } @else if (passwordResetSent()) {
+        <div class="confirmation-state">
+          <div class="confirmation-icon">
+            <mat-icon>lock_reset</mat-icon>
+          </div>
+          <h2>Reset your password</h2>
+          <p class="subtitle">
+            Enter the email for your Veyro account. We'll send a link to set a new password.
+            <br><br>
+            <em>For security, your current password cannot be viewed — only reset.</em>
+          </p>
+
+          <form [formGroup]="form" (ngSubmit)="sendPasswordReset()">
+            <mat-form-field appearance="outline" class="full-width">
+              <mat-label>Email</mat-label>
+              <input matInput formControlName="email" type="email" placeholder="you@example.com">
+              <mat-icon matPrefix>email</mat-icon>
+            </mat-form-field>
+
+            @if (successMessage()) {
+              <div class="success-message">
+                <mat-icon>check_circle</mat-icon>
+                {{ successMessage() }}
+                @if (pendingEmail()) {
+                  <span class="sent-to">Sent to <strong>{{ pendingEmail() }}</strong></span>
+                }
+              </div>
+            }
+
+            @if (error()) {
+              <div class="error-message">
+                <mat-icon>error_outline</mat-icon>
+                {{ error() }}
+              </div>
+            }
+
+            <button
+              mat-flat-button
+              color="primary"
+              class="submit-btn"
+              type="submit"
+              [disabled]="loading()">
+              @if (loading()) {
+                <mat-spinner diameter="20"></mat-spinner>
+              } @else {
+                Send reset link
+              }
+            </button>
+          </form>
+
+          <button mat-button color="primary" class="back-btn" type="button" (click)="backFromForgotPassword()">
+            Back to sign in
+          </button>
+        </div>
       } @else {
         <h2>{{ isSignUp() ? 'Create account' : 'Welcome back' }}</h2>
         <p class="subtitle">{{ isSignUp() ? 'Start managing your finances today' : 'Sign in to your account' }}</p>
@@ -113,6 +167,14 @@
               <mat-icon>{{ hidePassword() ? 'visibility_off' : 'visibility' }}</mat-icon>
             </button>
           </mat-form-field>
+
+          @if (!isSignUp()) {
+            <div class="forgot-row">
+              <button mat-button color="primary" type="button" class="forgot-btn" (click)="showForgotPassword()">
+                Forgot password?
+              </button>
+            </div>
+          }
 
           @if (error()) {
             <div class="error-message">

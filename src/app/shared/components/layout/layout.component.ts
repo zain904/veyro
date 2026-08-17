@@ -1,7 +1,7 @@
-import { Component, OnInit, OnDestroy, signal } from '@angular/core';
+import { Component, OnInit, OnDestroy, AfterViewInit, signal, viewChild } from '@angular/core';
 import { RouterLink, RouterLinkActive, RouterOutlet } from '@angular/router';
 import { MatToolbarModule } from '@angular/material/toolbar';
-import { MatSidenavModule } from '@angular/material/sidenav';
+import { MatSidenavContainer, MatSidenavModule } from '@angular/material/sidenav';
 import { MatListModule } from '@angular/material/list';
 import { MatIconModule } from '@angular/material/icon';
 import { MatButtonModule } from '@angular/material/button';
@@ -19,6 +19,8 @@ import { AsyncPipe } from '@angular/common';
 import { AppFooterComponent } from '../footer/app-footer.component';
 
 const SIDEBAR_COLLAPSED_KEY = 'veyro-sidebar-collapsed';
+const SIDEBAR_WIDTH_EXPANDED = 260;
+const SIDEBAR_WIDTH_COLLAPSED = 72;
 
 @Component({
   selector: 'app-layout',
@@ -32,11 +34,18 @@ const SIDEBAR_COLLAPSED_KEY = 'veyro-sidebar-collapsed';
   templateUrl: './layout.component.html',
   styleUrl: './layout.component.scss',
 })
-export class LayoutComponent implements OnInit, OnDestroy {
+export class LayoutComponent implements OnInit, OnDestroy, AfterViewInit {
   isHandset = false;
   displayName = signal('User');
   sidebarCollapsed = signal(this.readCollapsedPreference());
+  sidenavContainer = viewChild(MatSidenavContainer);
   private sub?: Subscription;
+
+  get sidenavWidth(): number {
+    return !this.isHandset && this.sidebarCollapsed()
+      ? SIDEBAR_WIDTH_COLLAPSED
+      : SIDEBAR_WIDTH_EXPANDED;
+  }
 
   navItems = [
     { label: 'Dashboard', icon: 'dashboard', route: '/dashboard' },
@@ -58,6 +67,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
   ) {
     this.breakpointObserver.observe([Breakpoints.Handset]).subscribe(r => {
       this.isHandset = r.matches;
+      this.syncSidenavLayout();
     });
   }
 
@@ -76,8 +86,16 @@ export class LayoutComponent implements OnInit, OnDestroy {
     }
   }
 
+  ngAfterViewInit(): void {
+    this.syncSidenavLayout();
+  }
+
   ngOnDestroy(): void {
     this.sub?.unsubscribe();
+  }
+
+  private syncSidenavLayout(): void {
+    queueMicrotask(() => this.sidenavContainer()?.updateContentMargins());
   }
 
   private async loadDisplayName(): Promise<void> {
@@ -93,6 +111,7 @@ export class LayoutComponent implements OnInit, OnDestroy {
     const next = !this.sidebarCollapsed();
     this.sidebarCollapsed.set(next);
     localStorage.setItem(SIDEBAR_COLLAPSED_KEY, String(next));
+    this.syncSidenavLayout();
   }
 
   signOut(): void {

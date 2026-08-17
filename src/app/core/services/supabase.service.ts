@@ -109,6 +109,25 @@ export class SupabaseService {
     return { error: error?.message ?? null };
   }
 
+  getPasswordResetRedirectUrl(): string {
+    if (typeof window !== 'undefined' && window.location?.origin) {
+      return `${window.location.origin}/reset-password`;
+    }
+    return 'https://veyro-red.vercel.app/reset-password';
+  }
+
+  async resetPasswordForEmail(email: string): Promise<AuthResult> {
+    const { error } = await this.supabase.auth.resetPasswordForEmail(email, {
+      redirectTo: this.getPasswordResetRedirectUrl(),
+    });
+    return { error: error?.message ?? null, email };
+  }
+
+  async updatePassword(newPassword: string): Promise<AuthResult> {
+    const { error } = await this.supabase.auth.updateUser({ password: newPassword });
+    return { error: error?.message ?? null };
+  }
+
   async signOut(): Promise<void> {
     await this.supabase.auth.signOut();
   }

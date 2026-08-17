@@ -35,6 +35,7 @@ export class LoginComponent {
   error = signal<string | null>(null);
   successMessage = signal<string | null>(null);
   emailConfirmationSent = signal(false);
+  passwordResetSent = signal(false);
   pendingEmail = signal('');
   hidePassword = signal(true);
 
@@ -49,13 +50,56 @@ export class LoginComponent {
     this.error.set(null);
     this.successMessage.set(null);
     this.emailConfirmationSent.set(false);
+    this.passwordResetSent.set(false);
+  }
+
+  showForgotPassword(): void {
+    this.passwordResetSent.set(true);
+    this.isSignUp.set(false);
+    this.emailConfirmationSent.set(false);
+    this.error.set(null);
+    this.successMessage.set(null);
+    if (this.form.value.email) {
+      this.pendingEmail.set(this.form.value.email);
+    }
+  }
+
+  backFromForgotPassword(): void {
+    this.passwordResetSent.set(false);
+    this.error.set(null);
+    this.successMessage.set(null);
   }
 
   backToSignIn(): void {
     this.emailConfirmationSent.set(false);
+    this.passwordResetSent.set(false);
     this.isSignUp.set(false);
     this.error.set(null);
     this.successMessage.set(null);
+  }
+
+  async sendPasswordReset(): Promise<void> {
+    const email = this.form.value.email?.trim();
+    if (!email) {
+      this.error.set('Enter your email address first.');
+      return;
+    }
+
+    this.loading.set(true);
+    this.error.set(null);
+    this.successMessage.set(null);
+
+    try {
+      const result = await this.auth.requestPasswordReset(email);
+      if (result.error) {
+        this.error.set(result.error);
+      } else {
+        this.pendingEmail.set(email);
+        this.successMessage.set('Password reset link sent! Check your inbox and spam folder.');
+      }
+    } finally {
+      this.loading.set(false);
+    }
   }
 
   async onSubmit(): Promise<void> {
