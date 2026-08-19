@@ -91,4 +91,10 @@ export class ProfileService {
   async removeAvatar(): Promise<Profile> {
     return this.updateProfile({ avatar_url: null });
   }
+
+  async deleteAllUserData(): Promise<void> {
+    await this.supabase.whenReady();
+    const { error } = await this.supabase.client.rpc('delete_user_data');
+    if (error) throw error;
+  }
 }

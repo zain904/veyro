@@ -1,0 +1,64 @@
+<mat-card class="quick-add-card panel-card veyro-card">
+  <div class="quick-add-header">
+    <mat-icon>bolt</mat-icon>
+    <div>
+      <h3>{{ 'dashboard.quickAddTitle' | translate }}</h3>
+      <p>{{ 'dashboard.quickAddHint' | translate }}</p>
+    </div>
+  </div>
+
+  <div class="quick-add-row">
+    <mat-form-field appearance="outline" class="amount-field" subscriptSizing="dynamic">
+      <mat-label>{{ 'dialogs.amount' | translate }}</mat-label>
+      <input
+        matInput
+        type="number"
+        min="0"
+        step="0.01"
+        [(ngModel)]="amount"
+        (keyup.enter)="submit()">
+      <span matTextPrefix>{{ currencyService.prefix() }}&nbsp;</span>
+    </mat-form-field>
+
+    <button
+      mat-flat-button
+      color="primary"
+      type="button"
+      (click)="submit()"
+      [disabled]="saving() || !amount || amount <= 0 || !selectedCategoryId()">
+      @if (saving()) {
+        <mat-icon class="spin">sync</mat-icon>
+      } @else {
+        <mat-icon>add</mat-icon>
+      }
+      {{ 'dashboard.quickAddSave' | translate }}
+    </button>
+  </div>
+
+  @if (frequentCategories().length > 0) {
+    <div class="category-chips">
+      @for (cat of frequentCategories(); track cat.id) {
+        <button
+          type="button"
+          class="cat-chip"
+          [class.selected]="selectedCategoryId() === cat.id"
+          [style.--chip-color]="cat.color"
+          (click)="selectCategory(cat.id)">
+          <mat-icon>{{ cat.icon || 'category' }}</mat-icon>
+          {{ cat.name }}
+        </button>
+      }
+    </div>
+  }
+
+  @if (lastExpense(); as last) {
+    <button mat-stroked-button type="button" class="repeat-btn" (click)="repeatLast()" [disabled]="saving()">
+      <mat-icon>replay</mat-icon>
+      {{ 'dashboard.repeatLast' | translate: { amount: (last.amount | veyroCurrency), category: last.category?.name } }}
+    </button>
+  }
+
+  @if (error()) {
+    <p class="quick-add-error">{{ error() }}</p>
+  }
+</mat-card>

@@ -2,7 +2,7 @@
 
 **Know where your money goes.**
 
-A polished personal finance manager built with Angular 19 and Supabase. Track income, expenses, budgets, and savings — all in one place.
+A polished personal finance manager built with Angular 19 and Supabase. Track income, expenses, budgets, and savings — in English, Urdu, or Arabic.
 
 **Author:** [Zain Ul Abdeen](mailto:zulabdeen86@gmail.com) · **Live:** [veyro-red.vercel.app](https://veyro-red.vercel.app)
 
@@ -13,27 +13,15 @@ A polished personal finance manager built with Angular 19 and Supabase. Track in
 ## Features
 
 - **Authentication** — Sign up / sign in with Supabase Auth (JWT)
-- **Dashboard** — Balance, income, expenses, savings at a glance
-- **Transactions** — Add, edit, delete with search and filters
-- **Budgets** — Set monthly category budgets with progress tracking
-- **Reports** — Charts for trends, categories, and savings rate
+- **Smart dashboard** — Safe-to-spend, today's spend, budget forecasts, quick add, savings goal, health status
+- **Transactions** — Add, edit, delete with search, filters, and chart drill-down
+- **Budgets** — Monthly category budgets with progress and urgency sorting
+- **Reports** — Trends, category breakdown, cash flow, CSV export, chart drill-down
+- **Categories** — Full CRUD (add, edit, delete) with icons and colors
+- **Settings** — Profile, avatar, currency, language, savings goal, export, delete all data
+- **i18n + RTL** — English, Urdu, Arabic with right-to-left layout
 - **Dark / Light mode** — Theme toggle with persistence
 - **Responsive** — Works on desktop and mobile
-
-## Screens
-
-| Login | Dashboard | Transactions | Budgets | Reports |
-|-------|-----------|--------------|---------|---------|
-| Auth  | Overview  | CRUD + filters | Limits | Charts |
-
-## Tech Stack
-
-| Layer    | Technology              |
-|----------|-------------------------|
-| Frontend | Angular 19, Material 19 |
-| Backend  | Supabase (Auth + DB)    |
-| Database | PostgreSQL              |
-| Charts   | ApexCharts              |
 
 ## Getting Started
 
@@ -47,8 +35,14 @@ npm install
 ### 2. Set up Supabase
 
 1. Create a project at [supabase.com](https://supabase.com)
-2. Go to **SQL Editor** and run the contents of `supabase/schema.sql`
-3. Go to **Settings → API** and copy your project URL and anon key
+2. Run **`supabase/schema.sql`** in the SQL Editor (full schema, safe to re-run)
+3. If upgrading an existing project, also run these patches in order:
+   - `supabase/patch-locale.sql`
+   - `supabase/patch-avatar-storage.sql`
+   - `supabase/patch-savings-goal.sql`
+   - `supabase/patch-delete-user-data.sql`
+   - `supabase/patch-rls-with-check.sql`
+4. Copy your project URL and anon key from **Settings → API**
 
 ### 3. Configure environment
 
@@ -72,50 +66,29 @@ npm start
 
 Open [http://localhost:4200](http://localhost:4200)
 
-### 5. Create an account
+### 5. Run tests
 
-Sign up with email and password. Default expense and income categories are created automatically.
+```bash
+npm test          # watch mode
+npm run test:ci   # single run (CI)
+npm run build     # production build
+```
 
 ## Project Structure
 
 ```
 src/app/
-├── core/
-│   ├── guards/          # Auth guards
-│   ├── models/          # TypeScript interfaces
-│   └── services/        # Supabase, auth, transactions, budgets
-├── features/
-│   ├── auth/login/      # Login & signup
-│   ├── dashboard/       # Overview screen
-│   ├── transactions/    # Transaction management
-│   ├── budgets/         # Budget management
-│   └── reports/         # Charts & analytics
-└── shared/
-    ├── components/      # Layout, chart wrapper
-    └── pipes/           # Currency formatting
-supabase/
-└── schema.sql           # Database schema + RLS policies
+├── core/           # Services, models, guards, utils
+├── features/       # Dashboard, transactions, budgets, reports, categories, settings
+├── shared/         # Layout, charts, pipes, empty states
+public/i18n/        # en.json, ur.json, ar.json
+supabase/           # schema.sql + migration patches
 ```
 
-## Database Schema
+## Deploy
 
-- **profiles** — User profile (name, currency)
-- **categories** — Income/expense categories (auto-seeded on signup)
-- **transactions** — Financial transactions
-- **budgets** — Monthly category budgets
-
-All tables use Row Level Security (RLS) so users only see their own data.
-
-## Scripts
-
-| Command       | Description              |
-|---------------|--------------------------|
-| `npm start`   | Dev server on port 4200  |
-| `npm run build` | Production build       |
-| `npm test`    | Run unit tests           |
+Push to `main` — Vercel auto-deploys from GitHub. Ensure production Supabase env vars and redirect URLs are configured for auth.
 
 ## License
 
-MIT — Copyright © 2026 **Zain Ul Abdeen** ([zulabdeen86@gmail.com](mailto:zulabdeen86@gmail.com)). All rights reserved.
-
-See [LICENSE](LICENSE) for full terms.
+MIT · © Zain Ul Abdeen

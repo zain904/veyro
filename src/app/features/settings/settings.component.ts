@@ -14,6 +14,7 @@ import { ThemeService } from '../../core/services/theme.service';
 import { DataRefreshService } from '../../core/services/data-refresh.service';
 import { TransactionService } from '../../core/services/transaction.service';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
+import { ToastService } from '../../core/services/toast.service';
 import { CurrencyService } from '../../core/services/currency.service';
 import { LanguageService } from '../../core/services/language.service';
 import { Profile } from '../../core/models/transaction.model';
@@ -44,6 +45,7 @@ export class SettingsComponent implements OnInit {
   private profileService = inject(ProfileService);
   private transactionService = inject(TransactionService);
   private confirmDialog = inject(ConfirmDialogService);
+  private toast = inject(ToastService);
   private refresh = inject(DataRefreshService);
 
   loading = signal(true);
@@ -55,6 +57,7 @@ export class SettingsComponent implements OnInit {
   fullName = '';
   selectedCurrency = 'PKR';
   selectedLanguage: AppLanguage = 'en';
+  savingsGoalTarget: number | null = null;
   message = signal<string | null>(null);
   errorMessage = signal<string | null>(null);
   author = APP_AUTHOR;
@@ -83,6 +86,7 @@ export class SettingsComponent implements OnInit {
       this.profile.set(p);
       this.fullName = p?.full_name ?? '';
       this.selectedCurrency = p?.currency ?? 'PKR';
+      this.savingsGoalTarget = p?.savings_goal_target ?? null;
       if (p?.locale && isSupportedLanguage(p.locale)) {
         this.selectedLanguage = p.locale;
       } else {
@@ -91,6 +95,7 @@ export class SettingsComponent implements OnInit {
       this.avatarUrl.set(resolveAvatarUrl(p, this.auth.currentUser));
     } catch (err) {
       console.error(err);
+      this.errorMessage.set(this.langService.instant('errors.loadFailed'));
     } finally {
       this.loading.set(false);
     }
@@ -114,6 +119,7 @@ export class SettingsComponent implements OnInit {
         full_name: this.fullName,
         currency: this.selectedCurrency,
         locale: this.selectedLanguage,
+        savings_goal_target: this.savingsGoalTarget,
       });
       this.profile.set(updated);
       this.refresh.notify('profile');
@@ -177,7 +183,7 @@ export class SettingsComponent implements OnInit {
     if (result.error) {
       this.errorMessage.set(result.error);
     } else {
-      this.message.set(`Password reset link sent to ${email}.`);
+      this.message.set(this.langService.instant('settings.passwordResetSent', { email }));
     }
   }
 
@@ -204,9 +210,12 @@ export class SettingsComponent implements OnInit {
         ).join('\n');
         this.downloadFile(header + rows, filename, 'text/csv');
       }
-      this.message.set(`Exported ${transactions.length} transactions as ${format.toUpperCase()}.`);
+      this.message.set(this.langService.instant('settings.exportSuccess', {
+        count: transactions.length,
+        format: format.toUpperCase(),
+      }));
     } catch (err) {
-      this.errorMessage.set('Failed to export data.');
+      this.errorMessage.set(this.langService.instant('errors.exportFailed'));
       console.error(err);
     } finally {
       this.exporting.set(false);
@@ -226,14 +235,11 @@ export class SettingsComponent implements OnInit {
     this.message.set(null);
     this.errorMessage.set(null);
     try {
-      const transactions = await this.transactionService.getTransactions();
-      for (const tx of transactions) {
-        await this.transactionService.deleteTransaction(tx.id);
-      }
-      this.message.set('Your data has been deleted. Signing out…');
+      await this.profileService.deleteAllUserData();
+      this.message.set(this.langService.instant('settings.deleteDataSuccess'));
       setTimeout(() => this.auth.signOut(), 1200);
     } catch (err) {
-      this.errorMessage.set('Failed to delete account data.');
+      this.errorMessage.set(this.langService.instant('errors.deleteFailed'));
       console.error(err);
     }
   }

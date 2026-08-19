@@ -66,6 +66,27 @@ export class CategoryService {
     return data as Category;
   }
 
+  async updateCategory(id: string, updates: Partial<Pick<Category, 'name' | 'icon' | 'color'>>): Promise<Category> {
+    const { data, error } = await this.supabase.client
+      .from('categories')
+      .update(updates)
+      .eq('id', id)
+      .select()
+      .single();
+
+    if (error) throw error;
+    return data as Category;
+  }
+
+  async deleteCategory(id: string): Promise<void> {
+    const { error } = await this.supabase.client
+      .from('categories')
+      .delete()
+      .eq('id', id);
+
+    if (error) throw error;
+  }
+
   private async ensureProfile(userId: string, fullName?: string): Promise<void> {
     const { data: profile } = await this.supabase.client
       .from('profiles')

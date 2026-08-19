@@ -76,6 +76,12 @@
             }
           </mat-select>
         </mat-form-field>
+        <mat-form-field appearance="outline" class="full-width">
+          <mat-label>{{ 'settings.savingsGoal' | translate }}</mat-label>
+          <input matInput type="number" min="0" step="0.01" [(ngModel)]="savingsGoalTarget">
+          <span matTextPrefix>{{ currencyService.prefix() }}&nbsp;</span>
+          <mat-hint>{{ 'settings.savingsGoalHint' | translate }}</mat-hint>
+        </mat-form-field>
         <button mat-flat-button color="primary" (click)="saveProfile()" [disabled]="saving()">
           {{ 'settings.saveProfile' | translate }}
         </button>

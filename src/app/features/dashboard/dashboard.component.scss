@@ -433,3 +433,189 @@
     button { flex: 1; }
   }
 }
+
+.pulse-banner {
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+
+.pulse-top {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+}
+
+.pulse-main {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 32px;
+}
+
+.pulse-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+  margin-bottom: 4px;
+}
+
+.pulse-value {
+  display: block;
+  font-size: clamp(28px, 5vw, 36px);
+  font-weight: 800;
+  line-height: 1.1;
+  color: var(--primary-color);
+
+  &.negative { color: var(--expense-color); }
+}
+
+.today-spend .pulse-value {
+  font-size: clamp(22px, 4vw, 28px);
+}
+
+.pulse-hint {
+  display: block;
+  font-size: 12px;
+  color: var(--text-secondary);
+  margin-top: 4px;
+}
+
+.pulse-meta {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 6px;
+}
+
+.health-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  font-weight: 600;
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &.good {
+    background: color-mix(in srgb, var(--income-color) 15%, transparent);
+    color: var(--income-color);
+  }
+
+  &.caution {
+    background: color-mix(in srgb, #f59e0b 15%, transparent);
+    color: #d97706;
+  }
+
+  &.danger {
+    background: color-mix(in srgb, var(--expense-color) 15%, transparent);
+    color: var(--expense-color);
+  }
+}
+
+.last-updated {
+  font-size: 12px;
+  color: var(--text-secondary);
+}
+
+.month-plan {
+  margin: 16px 0 0;
+  font-size: 14px;
+  color: var(--text-secondary);
+}
+
+.summary-line {
+  margin: 0 0 16px;
+  padding: 12px 16px;
+  border-radius: var(--radius-md);
+  background: var(--hover-color);
+  font-size: 14px;
+  font-weight: 500;
+}
+
+.completeness-hints {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-bottom: 16px;
+}
+
+.hint-chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 8px 12px;
+  border-radius: 999px;
+  font-size: 13px;
+  text-decoration: none;
+  color: inherit;
+  background: var(--hover-color);
+  transition: background var(--transition-fast);
+
+  mat-icon {
+    font-size: 18px;
+    width: 18px;
+    height: 18px;
+  }
+
+  &.warning {
+    background: color-mix(in srgb, #f59e0b 12%, transparent);
+  }
+
+  &:hover { background: var(--border-color); }
+}
+
+app-dashboard-quick-add {
+  display: block;
+  margin-bottom: 16px;
+}
+
+.savings-goal-card {
+  margin-bottom: 16px;
+
+  .goal-pct {
+    font-size: 20px;
+    font-weight: 700;
+    color: var(--primary-color);
+  }
+}
+
+.forecast-panel {
+  margin-bottom: 16px;
+}
+
+.forecast-list {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.forecast-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: var(--radius-sm);
+  background: var(--hover-color);
+  font-size: 14px;
+
+  mat-icon {
+    color: #d97706;
+    flex-shrink: 0;
+  }
+
+  &.danger {
+    background: color-mix(in srgb, var(--expense-color) 10%, transparent);
+
+    mat-icon { color: var(--expense-color); }
+  }
+}

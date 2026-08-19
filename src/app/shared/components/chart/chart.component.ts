@@ -75,6 +75,7 @@ export class ChartComponent implements OnChanges, OnDestroy, AfterViewInit {
   @Input() actionRoute = '/transactions';
   @Input() minHeight = 220;
   @Output() actionClick = new EventEmitter<void>();
+  @Output() dataPointClick = new EventEmitter<{ seriesIndex: number; dataPointIndex: number }>();
 
   chartContainer = viewChild<ElementRef>('chartContainer');
   private chart: ApexCharts | null = null;
@@ -131,6 +132,16 @@ export class ChartComponent implements OnChanges, OnDestroy, AfterViewInit {
         ...this.options.chart,
         redrawOnParentResize: true,
         redrawOnWindowResize: true,
+        events: {
+          ...(this.options.chart?.events ?? {}),
+          dataPointSelection: (_event, _chartContext, config) => {
+            if (!config) return;
+            this.dataPointClick.emit({
+              seriesIndex: config.seriesIndex,
+              dataPointIndex: config.dataPointIndex,
+            });
+          },
+        },
       },
     };
 

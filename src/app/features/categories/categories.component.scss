@@ -39,6 +39,22 @@
   display: flex;
   justify-content: space-between;
   align-items: flex-start;
+  gap: 8px;
+}
+
+.cat-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.error-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px;
+  text-align: center;
 }
 
 .cat-icon {

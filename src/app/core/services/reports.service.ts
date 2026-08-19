@@ -1,6 +1,7 @@
-import { Injectable } from '@angular/core';
+import { Injectable, inject } from '@angular/core';
 import { TransactionService } from './transaction.service';
 import { BudgetService } from './budget.service';
+import { LanguageService } from './language.service';
 import { buildChange, ReportInsights, ReportSummary } from '../models/report.model';
 import { Transaction } from '../models/transaction.model';
 import { CategoryChartItem, TrendChartItem } from './chart-builder.service';
@@ -22,6 +23,8 @@ const RECENT_TX_LIMIT = 8;
 
 @Injectable({ providedIn: 'root' })
 export class ReportsService {
+  private lang = inject(LanguageService);
+
   constructor(
     private transactionService: TransactionService,
     private budgetService: BudgetService
@@ -65,7 +68,7 @@ export class ReportsService {
     ] = await Promise.all([
       this.transactionService.getStatsForRange(startDate, endDate),
       this.transactionService.getStatsForRange(prev.startDate, prev.endDate),
-      this.transactionService.getTrendForRange(startDate, endDate),
+      this.transactionService.getTrendForRange(startDate, endDate, this.lang.currentLang()),
       this.transactionService.getExpensesByCategoryForRange(startDate, endDate),
       this.transactionService.getTransactions({ startDate, endDate }),
       this.getRangeTransactionCount(startDate, endDate),
@@ -109,7 +112,7 @@ export class ReportsService {
     ] = await Promise.all([
       this.transactionService.getMonthlyStats(month, year),
       this.transactionService.getMonthlyStats(prev.month, prev.year),
-      this.transactionService.getMonthlyTrend(trendMonths),
+      this.transactionService.getMonthlyTrend(trendMonths, this.lang.currentLang()),
       this.transactionService.getExpensesByCategory(month, year),
       this.transactionService.getTransactions({ month, year }),
       this.getTransactionCount(month, year),
@@ -148,7 +151,7 @@ export class ReportsService {
     ] = await Promise.all([
       this.transactionService.getYearlyStats(year),
       this.transactionService.getYearlyStats(prevYear),
-      this.transactionService.getYearTrend(year),
+      this.transactionService.getYearTrend(year, this.lang.currentLang()),
       this.transactionService.getExpensesByCategoryForYear(year),
       this.transactionService.getTransactions({ year }),
       this.getYearlyTransactionCount(year),

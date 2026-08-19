@@ -1,130 +1,136 @@
-<div class="transactions-page">
-  <div class="veyro-page-header">
-    <div>
-      <nav class="breadcrumbs">
-        <span>{{ 'common.home' | translate }}</span>
-        <mat-icon>chevron_right</mat-icon>
-        <span class="current">{{ 'transactions.title' | translate }}</span>
-      </nav>
-      <h1>{{ 'transactions.title' | translate }}</h1>
-      <p class="subtitle">{{ periodLabel }} · {{ 'transactions.subtitle' | translate }}</p>
-    </div>
-    <div class="header-actions">
-      <button mat-flat-button color="primary" (click)="openDialog()">
-        <mat-icon>add</mat-icon>
-        {{ 'transactions.addTransaction' | translate }}
-      </button>
-    </div>
-  </div>
-
-  <mat-card class="filters-card panel-card">
-    <div class="filters">
-      <mat-form-field appearance="outline" class="search-field">
-        <mat-label>{{ 'common.search' | translate }}</mat-label>
-        <input matInput [(ngModel)]="searchQuery" (ngModelChange)="onFilterChange()" [placeholder]="'transactions.searchPlaceholder' | translate">
-        <mat-icon matPrefix>search</mat-icon>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>{{ 'transactions.type' | translate }}</mat-label>
-        <mat-select [(ngModel)]="filterType" (ngModelChange)="onFilterChange()">
-          <mat-option value="">{{ 'common.all' | translate }}</mat-option>
-          <mat-option value="income">{{ 'common.income' | translate }}</mat-option>
-          <mat-option value="expense">{{ 'common.expense' | translate }}</mat-option>
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline">
-        <mat-label>{{ 'transactions.category' | translate }}</mat-label>
-        <mat-select [(ngModel)]="filterCategory" (ngModelChange)="onFilterChange()">
-          <mat-option value="">{{ 'common.all' | translate }}</mat-option>
-          @for (cat of categories(); track cat.id) {
-            <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>{{ 'common.month' | translate }}</mat-label>
-        <mat-select [(ngModel)]="filterMonth" (ngModelChange)="onFilterChange()">
-          @for (m of months; track m.value) {
-            <mat-option [value]="m.value">{{ getMonthLabel(m.value) }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>{{ 'common.year' | translate }}</mat-label>
-        <mat-select [(ngModel)]="filterYear" (ngModelChange)="onFilterChange()">
-          @for (y of years; track y) {
-            <mat-option [value]="y">{{ y }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-    </div>
-  </mat-card>
-
-  @if (loading()) {
-    <div class="skeleton-grid">
-      @for (i of [1,2,3]; track i) { <div class="skeleton-card"></div> }
-    </div>
-  } @else {
-    <div class="kpi-row">
-      <mat-card class="kpi-card income">
-        <span class="kpi-label">{{ 'common.income' | translate }}</span>
-        <span class="kpi-value">{{ totalIncome | veyroCurrency }}</span>
-        <span class="kpi-hint">{{ 'transactions.transactionCount' | translate: { count: incomeCount } }}</span>
-      </mat-card>
-      <mat-card class="kpi-card expense">
-        <span class="kpi-label">{{ 'common.expenses' | translate }}</span>
-        <span class="kpi-value">{{ totalExpenses | veyroCurrency }}</span>
-        <span class="kpi-hint">{{ 'transactions.transactionCount' | translate: { count: expenseCount } }}</span>
-      </mat-card>
-      <mat-card class="kpi-card net">
-        <span class="kpi-label">{{ 'common.net' | translate }}</span>
-        <span class="kpi-value" [class.negative]="netBalance < 0">{{ netBalance | veyroCurrency }}</span>
-        <span class="kpi-hint">{{ 'transactions.totalCount' | translate: { count: transactionCount } }}</span>
-      </mat-card>
-    </div>
-
-    @if (transactions().length === 0) {
-      <app-empty-state
-        icon="receipt_long"
-        [title]="'transactions.emptyTitle' | translate"
-        [message]="'transactions.emptyMessage' | translate"
-        [actionLabel]="'transactions.addTransaction' | translate"
-        (actionClick)="openDialog()" />
-    } @else {
-      @for (group of groupedByDate; track group.date) {
-        <div class="date-group">
-          <h3 class="date-label">{{ formatDate(group.date) }}</h3>
-          <mat-card class="transaction-group-card panel-card">
-            @for (tx of group.items; track tx.id) {
-              <div class="tx-row">
-                <div class="tx-icon-sm" [style.background]="(tx.category?.color ?? '#64748b') + '22'" [style.color]="tx.category?.color">
-                  <mat-icon>{{ tx.category?.icon || 'receipt' }}</mat-icon>
-                </div>
-                <div class="tx-info-col">
-                  <span class="name">{{ tx.category?.name }}</span>
-                  @if (tx.description) {
-                    <span class="meta">{{ tx.description }}</span>
-                  }
-                  <span class="type-badge" [class.expense]="tx.type === 'expense'" [class.income]="tx.type === 'income'">{{ tx.type === 'income' ? ('common.income' | translate) : ('common.expense' | translate) }}</span>
-                </div>
-                <div class="tx-actions-col">
-                  <span class="tx-amt" [class.income]="tx.type === 'income'" [class.expense]="tx.type === 'expense'">
-                    {{ tx.type === 'income' ? '+' : '−' }} {{ tx.amount | veyroCurrency }}
-                  </span>
-                  <div class="tx-actions">
-                    <button mat-icon-button (click)="openDialog(tx)"><mat-icon>edit</mat-icon></button>
-                    <button mat-icon-button color="warn" (click)="deleteTransaction(tx)"><mat-icon>delete</mat-icon></button>
-                  </div>
-                </div>
-              </div>
-            }
-          </mat-card>
-        </div>
-      }
-    }
-  }
-</div>
+<div class="transactions-page">
+  <div class="veyro-page-header">
+    <div>
+      <nav class="breadcrumbs">
+        <span>{{ 'common.home' | translate }}</span>
+        <mat-icon>chevron_right</mat-icon>
+        <span class="current">{{ 'transactions.title' | translate }}</span>
+      </nav>
+      <h1>{{ 'transactions.title' | translate }}</h1>
+      <p class="subtitle">{{ periodLabel }} · {{ 'transactions.subtitle' | translate }}</p>
+    </div>
+    <div class="header-actions">
+      <button mat-flat-button color="primary" (click)="openDialog()">
+        <mat-icon>add</mat-icon>
+        {{ 'transactions.addTransaction' | translate }}
+      </button>
+    </div>
+  </div>
+
+  <mat-card class="filters-card panel-card">
+    <div class="filters">
+      <mat-form-field appearance="outline" class="search-field">
+        <mat-label>{{ 'common.search' | translate }}</mat-label>
+        <input matInput [(ngModel)]="searchQuery" (ngModelChange)="onFilterChange()" [placeholder]="'transactions.searchPlaceholder' | translate">
+        <mat-icon matPrefix>search</mat-icon>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'transactions.type' | translate }}</mat-label>
+        <mat-select [(ngModel)]="filterType" (ngModelChange)="onFilterChange()">
+          <mat-option value="">{{ 'common.all' | translate }}</mat-option>
+          <mat-option value="income">{{ 'common.income' | translate }}</mat-option>
+          <mat-option value="expense">{{ 'common.expense' | translate }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'transactions.category' | translate }}</mat-label>
+        <mat-select [(ngModel)]="filterCategory" (ngModelChange)="onFilterChange()">
+          <mat-option value="">{{ 'common.all' | translate }}</mat-option>
+          @for (cat of categories(); track cat.id) {
+            <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'common.month' | translate }}</mat-label>
+        <mat-select [(ngModel)]="filterMonth" (ngModelChange)="onFilterChange()">
+          @for (m of months; track m.value) {
+            <mat-option [value]="m.value">{{ getMonthLabel(m.value) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'common.year' | translate }}</mat-label>
+        <mat-select [(ngModel)]="filterYear" (ngModelChange)="onFilterChange()">
+          @for (y of years; track y) {
+            <mat-option [value]="y">{{ y }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </mat-card>
+
+  @if (loading()) {
+    <div class="skeleton-grid">
+      @for (i of [1,2,3]; track i) { <div class="skeleton-card"></div> }
+    </div>
+  } @else if (error()) {
+    <mat-card class="error-card panel-card">
+      <mat-icon>cloud_off</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-flat-button color="primary" (click)="loadTransactions()">{{ 'common.tryAgain' | translate }}</button>
+    </mat-card>
+  } @else {
+    <div class="kpi-row">
+      <mat-card class="kpi-card income">
+        <span class="kpi-label">{{ 'common.income' | translate }}</span>
+        <span class="kpi-value">{{ totalIncome | veyroCurrency }}</span>
+        <span class="kpi-hint">{{ 'transactions.transactionCount' | translate: { count: incomeCount } }}</span>
+      </mat-card>
+      <mat-card class="kpi-card expense">
+        <span class="kpi-label">{{ 'common.expenses' | translate }}</span>
+        <span class="kpi-value">{{ totalExpenses | veyroCurrency }}</span>
+        <span class="kpi-hint">{{ 'transactions.transactionCount' | translate: { count: expenseCount } }}</span>
+      </mat-card>
+      <mat-card class="kpi-card net">
+        <span class="kpi-label">{{ 'common.net' | translate }}</span>
+        <span class="kpi-value" [class.negative]="netBalance < 0">{{ netBalance | veyroCurrency }}</span>
+        <span class="kpi-hint">{{ 'transactions.totalCount' | translate: { count: transactionCount } }}</span>
+      </mat-card>
+    </div>
+
+    @if (transactions().length === 0) {
+      <app-empty-state
+        icon="receipt_long"
+        [title]="'transactions.emptyTitle' | translate"
+        [message]="'transactions.emptyMessage' | translate"
+        [actionLabel]="'transactions.addTransaction' | translate"
+        (actionClick)="openDialog()" />
+    } @else {
+      @for (group of groupedByDate; track group.date) {
+        <div class="date-group">
+          <h3 class="date-label">{{ formatDate(group.date) }}</h3>
+          <mat-card class="transaction-group-card panel-card">
+            @for (tx of group.items; track tx.id) {
+              <div class="tx-row">
+                <div class="tx-icon-sm" [style.background]="(tx.category?.color ?? '#64748b') + '22'" [style.color]="tx.category?.color">
+                  <mat-icon>{{ tx.category?.icon || 'receipt' }}</mat-icon>
+                </div>
+                <div class="tx-info-col">
+                  <span class="name">{{ tx.category?.name }}</span>
+                  @if (tx.description) {
+                    <span class="meta">{{ tx.description }}</span>
+                  }
+                  <span class="type-badge" [class.expense]="tx.type === 'expense'" [class.income]="tx.type === 'income'">{{ tx.type === 'income' ? ('common.income' | translate) : ('common.expense' | translate) }}</span>
+                </div>
+                <div class="tx-actions-col">
+                  <span class="tx-amt" [class.income]="tx.type === 'income'" [class.expense]="tx.type === 'expense'">
+                    {{ tx.type === 'income' ? '+' : '−' }} {{ tx.amount | veyroCurrency }}
+                  </span>
+                  <div class="tx-actions">
+                    <button mat-icon-button (click)="openDialog(tx)"><mat-icon>edit</mat-icon></button>
+                    <button mat-icon-button color="warn" (click)="deleteTransaction(tx)"><mat-icon>delete</mat-icon></button>
+                  </div>
+                </div>
+              </div>
+            }
+          </mat-card>
+        </div>
+      }
+    }
+  }
+</div>

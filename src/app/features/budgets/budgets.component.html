@@ -1,101 +1,107 @@
-<div class="budgets-page">
-  <div class="veyro-page-header">
-    <div>
-      <nav class="breadcrumbs">
-        <span>{{ 'common.home' | translate }}</span>
-        <mat-icon>chevron_right</mat-icon>
-        <span class="current">{{ 'budgets.title' | translate }}</span>
-      </nav>
-      <h1>{{ 'budgets.title' | translate }}</h1>
-      <p class="subtitle">{{ periodLabel }} · {{ 'budgets.subtitle' | translate }}</p>
-    </div>
-    <div class="header-actions">
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>{{ 'common.month' | translate }}</mat-label>
-        <mat-select [(ngModel)]="filterMonth" (ngModelChange)="loadBudgets()">
-          @for (m of months; track m.value) {
-            <mat-option [value]="m.value">{{ getMonthLabel(m.value) }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>{{ 'common.year' | translate }}</mat-label>
-        <mat-select [(ngModel)]="filterYear" (ngModelChange)="loadBudgets()">
-          @for (y of years; track y) {
-            <mat-option [value]="y">{{ y }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-      <button mat-flat-button color="primary" (click)="openDialog()">
-        <mat-icon>add</mat-icon>
-        {{ 'budgets.setBudget' | translate }}
-      </button>
-    </div>
-  </div>
-
-  @if (loading()) {
-    <div class="skeleton-grid">
-      @for (i of [1,2,3]; track i) { <div class="skeleton-card"></div> }
-    </div>
-  } @else if (budgets().length === 0) {
-    <app-empty-state
-      icon="account_balance_wallet"
-      [title]="'budgets.emptyTitle' | translate"
-      [message]="'budgets.emptyMessage' | translate"
-      [actionLabel]="'budgets.setBudget' | translate"
-      (actionClick)="openDialog()" />
-  } @else {
-    <div class="kpi-row">
-      <mat-card class="kpi-card neutral">
-        <span class="kpi-label">{{ 'budgets.totalBudget' | translate }}</span>
-        <span class="kpi-value">{{ totalBudget | veyroCurrency }}</span>
-        <span class="kpi-hint">{{ 'budgets.categoriesCount' | translate: { count: budgets().length } }}</span>
-      </mat-card>
-      <mat-card class="kpi-card expense">
-        <span class="kpi-label">{{ 'budgets.totalSpent' | translate }}</span>
-        <span class="kpi-value">{{ totalSpent | veyroCurrency }}</span>
-        <span class="kpi-hint">{{ 'budgets.percentUsed' | translate: { percent: totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0 } }}</span>
-      </mat-card>
-      <mat-card class="kpi-card net">
-        <span class="kpi-label">{{ 'budgets.remaining' | translate }}</span>
-        <span class="kpi-value" [class.negative]="remaining < 0">{{ remaining | veyroCurrency }}</span>
-        <span class="kpi-hint">{{ 'dashboard.leftToSpend' | translate }}</span>
-      </mat-card>
-    </div>
-
-    <div class="budget-grid">
-      @for (budget of budgets(); track budget.id) {
-        <mat-card class="budget-card panel-card veyro-card">
-          <div class="budget-card-header">
-            <div class="budget-category">
-              <div class="cat-icon-sm" [style.background]="(budget.category?.color ?? '#64748b') + '22'" [style.color]="budget.category?.color">
-                <mat-icon>{{ budget.category?.icon || 'category' }}</mat-icon>
-              </div>
-              <span>{{ budget.category?.name }}</span>
-              <span class="type-badge expense">{{ 'common.expense' | translate }}</span>
-            </div>
-            <div class="budget-actions">
-              <button mat-icon-button (click)="openDialog(budget)"><mat-icon>edit</mat-icon></button>
-              <button mat-icon-button color="warn" (click)="deleteBudget(budget)"><mat-icon>delete</mat-icon></button>
-            </div>
-          </div>
-
-          <div class="budget-percentage" [class.over]="(budget.percentage ?? 0) > 100">
-            {{ budget.percentage }}%
-          </div>
-
-          <mat-progress-bar
-            mode="determinate"
-            [value]="Math.min(budget.percentage ?? 0, 100)"
-            [color]="getBudgetColor(budget.percentage ?? 0)">
-          </mat-progress-bar>
-
-          <div class="budget-details">
-            <span>{{ 'budgets.spentOf' | translate: { spent: (budget.spent | veyroCurrency) } }}</span>
-            <span>{{ 'budgets.ofAmount' | translate: { amount: (budget.amount | veyroCurrency) } }}</span>
-          </div>
-        </mat-card>
-      }
-    </div>
-  }
-</div>
+<div class="budgets-page">
+  <div class="veyro-page-header">
+    <div>
+      <nav class="breadcrumbs">
+        <span>{{ 'common.home' | translate }}</span>
+        <mat-icon>chevron_right</mat-icon>
+        <span class="current">{{ 'budgets.title' | translate }}</span>
+      </nav>
+      <h1>{{ 'budgets.title' | translate }}</h1>
+      <p class="subtitle">{{ periodLabel }} · {{ 'budgets.subtitle' | translate }}</p>
+    </div>
+    <div class="header-actions">
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'common.month' | translate }}</mat-label>
+        <mat-select [(ngModel)]="filterMonth" (ngModelChange)="loadBudgets()">
+          @for (m of months; track m.value) {
+            <mat-option [value]="m.value">{{ getMonthLabel(m.value) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'common.year' | translate }}</mat-label>
+        <mat-select [(ngModel)]="filterYear" (ngModelChange)="loadBudgets()">
+          @for (y of years; track y) {
+            <mat-option [value]="y">{{ y }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <button mat-flat-button color="primary" (click)="openDialog()">
+        <mat-icon>add</mat-icon>
+        {{ 'budgets.setBudget' | translate }}
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton-grid">
+      @for (i of [1,2,3]; track i) { <div class="skeleton-card"></div> }
+    </div>
+  } @else if (error()) {
+    <mat-card class="error-card panel-card">
+      <mat-icon>cloud_off</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-flat-button color="primary" (click)="loadBudgets()">{{ 'common.tryAgain' | translate }}</button>
+    </mat-card>
+  } @else if (budgets().length === 0) {
+    <app-empty-state
+      icon="account_balance_wallet"
+      [title]="'budgets.emptyTitle' | translate"
+      [message]="'budgets.emptyMessage' | translate"
+      [actionLabel]="'budgets.setBudget' | translate"
+      (actionClick)="openDialog()" />
+  } @else {
+    <div class="kpi-row">
+      <mat-card class="kpi-card neutral">
+        <span class="kpi-label">{{ 'budgets.totalBudget' | translate }}</span>
+        <span class="kpi-value">{{ totalBudget | veyroCurrency }}</span>
+        <span class="kpi-hint">{{ 'budgets.categoriesCount' | translate: { count: budgets().length } }}</span>
+      </mat-card>
+      <mat-card class="kpi-card expense">
+        <span class="kpi-label">{{ 'budgets.totalSpent' | translate }}</span>
+        <span class="kpi-value">{{ totalSpent | veyroCurrency }}</span>
+        <span class="kpi-hint">{{ 'budgets.percentUsed' | translate: { percent: totalBudget > 0 ? Math.round((totalSpent / totalBudget) * 100) : 0 } }}</span>
+      </mat-card>
+      <mat-card class="kpi-card net">
+        <span class="kpi-label">{{ 'budgets.remaining' | translate }}</span>
+        <span class="kpi-value" [class.negative]="remaining < 0">{{ remaining | veyroCurrency }}</span>
+        <span class="kpi-hint">{{ 'dashboard.leftToSpend' | translate }}</span>
+      </mat-card>
+    </div>
+
+    <div class="budget-grid">
+      @for (budget of budgets(); track budget.id) {
+        <mat-card class="budget-card panel-card veyro-card">
+          <div class="budget-card-header">
+            <div class="budget-category">
+              <div class="cat-icon-sm" [style.background]="(budget.category?.color ?? '#64748b') + '22'" [style.color]="budget.category?.color">
+                <mat-icon>{{ budget.category?.icon || 'category' }}</mat-icon>
+              </div>
+              <span>{{ budget.category?.name }}</span>
+              <span class="type-badge expense">{{ 'common.expense' | translate }}</span>
+            </div>
+            <div class="budget-actions">
+              <button mat-icon-button (click)="openDialog(budget)"><mat-icon>edit</mat-icon></button>
+              <button mat-icon-button color="warn" (click)="deleteBudget(budget)"><mat-icon>delete</mat-icon></button>
+            </div>
+          </div>
+
+          <div class="budget-percentage" [class.over]="(budget.percentage ?? 0) > 100">
+            {{ budget.percentage }}%
+          </div>
+
+          <mat-progress-bar
+            mode="determinate"
+            [value]="Math.min(budget.percentage ?? 0, 100)"
+            [color]="getBudgetColor(budget.percentage ?? 0)">
+          </mat-progress-bar>
+
+          <div class="budget-details">
+            <span>{{ 'budgets.spentOf' | translate: { spent: (budget.spent | veyroCurrency) } }}</span>
+            <span>{{ 'budgets.ofAmount' | translate: { amount: (budget.amount | veyroCurrency) } }}</span>
+          </div>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

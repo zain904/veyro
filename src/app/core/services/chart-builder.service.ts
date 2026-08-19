@@ -4,6 +4,7 @@ import { ThemeService } from './theme.service';
 import { CurrencyService } from './currency.service';
 
 export interface CategoryChartItem {
+  id?: string;
   name: string;
   amount: number;
   color: string;

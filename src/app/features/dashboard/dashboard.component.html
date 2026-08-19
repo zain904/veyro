@@ -101,6 +101,106 @@
   }
 
   @else {
+    <section class="pulse-banner panel-card veyro-card">
+      <div class="pulse-top">
+        <div class="pulse-main">
+          <div class="safe-spend">
+            <span class="pulse-label">{{ 'dashboard.safeToSpend' | translate }}</span>
+            <span class="pulse-value" [class.negative]="safeToSpend() < 0">{{ safeToSpend() | veyroCurrency }}</span>
+            <span class="pulse-hint">{{ 'dashboard.safeToSpendHint' | translate }}</span>
+          </div>
+          <div class="today-spend">
+            <span class="pulse-label">{{ 'dashboard.todaySpend' | translate }}</span>
+            <span class="pulse-value">{{ todaySpend() | veyroCurrency }}</span>
+          </div>
+        </div>
+        <div class="pulse-meta">
+          <span class="health-badge" [class]="healthStatus()">
+            <mat-icon>{{ healthStatusIcon }}</mat-icon>
+            {{ healthStatusKey | translate }}
+          </span>
+          @if (lastUpdated()) {
+            <span class="last-updated">{{ 'dashboard.lastUpdated' | translate: { time: formatLastUpdated() } }}</span>
+          }
+          <button mat-icon-button type="button" (click)="refreshDashboard()" [attr.aria-label]="'common.refresh' | translate">
+            <mat-icon>refresh</mat-icon>
+          </button>
+        </div>
+      </div>
+      <p class="month-plan">
+        {{ 'dashboard.monthPlan' | translate: {
+          spent: (totalExpenses() | veyroCurrency),
+          remaining: (safeToSpend() | veyroCurrency),
+          days: daysRemaining
+        } }}
+      </p>
+    </section>
+
+    @if (monthSummary(); as summary) {
+      <p class="summary-line">{{ summary.key | translate: summary.params }}</p>
+    }
+
+    @if (completenessHints().length > 0) {
+      <div class="completeness-hints">
+        @for (hint of completenessHints(); track hint.messageKey) {
+          @if (hint.route) {
+            <a class="hint-chip" [class]="hint.tone" [routerLink]="hint.route">
+              <mat-icon>{{ hint.icon }}</mat-icon>
+              {{ hint.messageKey | translate: hint.params }}
+            </a>
+          } @else {
+            <span class="hint-chip" [class]="hint.tone">
+              <mat-icon>{{ hint.icon }}</mat-icon>
+              {{ hint.messageKey | translate: hint.params }}
+            </span>
+          }
+        }
+      </div>
+    }
+
+    <app-dashboard-quick-add (added)="onQuickAddDone()" />
+
+    @if (savingsGoalTarget() > 0) {
+      <mat-card class="panel-card savings-goal-card">
+        <div class="panel-header">
+          <div>
+            <h3>{{ 'dashboard.savingsGoal' | translate }}</h3>
+            <span class="hint">{{ 'dashboard.savingsGoalProgress' | translate: {
+              saved: (monthlySavingsSaved() | veyroCurrency),
+              target: (savingsGoalTarget() | veyroCurrency)
+            } }} · {{ 'dashboard.savingsGoalMonthlyHint' | translate }}</span>
+          </div>
+          <span class="goal-pct">{{ savingsGoalPercent }}%</span>
+        </div>
+        <mat-progress-bar mode="determinate" [value]="savingsGoalPercent" color="primary" />
+      </mat-card>
+    }
+
+    @if (budgetForecasts().length > 0) {
+      <mat-card class="panel-card forecast-panel">
+        <div class="panel-header">
+          <div>
+            <h3>{{ 'dashboard.forecastTitle' | translate }}</h3>
+            <span class="hint">{{ 'dashboard.forecastHint' | translate }}</span>
+          </div>
+        </div>
+        <div class="forecast-list">
+          @for (forecast of budgetForecasts(); track forecast.categoryId) {
+            <div class="forecast-item" [class.danger]="forecast.alreadyExceeded">
+              <mat-icon>{{ forecast.alreadyExceeded ? 'error' : 'schedule' }}</mat-icon>
+              <span>
+                @if (forecast.alreadyExceeded) {
+                  {{ 'dashboard.forecastExceeded' | translate: { name: forecast.categoryName } }}
+                } @else {
+                  {{ 'dashboard.forecastDays' | translate: { name: forecast.categoryName, days: forecast.daysUntilExceeded } }}
+                }
+              </span>
+            </div>
+          }
+        </div>
+      </mat-card>
+    }
+
     @if (insights().length > 0) {
       <section class="insights-row" aria-label="Financial insights">
         @for (insight of insights(); track insight.title) {
@@ -141,7 +241,7 @@
     }
 
     <div class="kpi-row">
-      <mat-card class="kpi-card income clickable" (click)="navigateToTransactions('income')" tabindex="0" role="button">
+      <mat-card class="kpi-card income clickable" (click)="navigateToTransactions('income')" (keydown.enter)="navigateToTransactions('income')" (keydown.space)="$event.preventDefault(); navigateToTransactions('income')" tabindex="0" role="button">
         <div class="kpi-top">
           <div class="kpi-icon"><mat-icon>trending_up</mat-icon></div>
           @if (incomeChange(); as change) {
@@ -156,7 +256,7 @@
         <span class="kpi-hint">{{ incomeChange() ? ('dashboard.vsLastMonth' | translate) : ('dashboard.noPriorData' | translate) }}</span>
       </mat-card>
 
-      <mat-card class="kpi-card expense clickable" (click)="navigateToTransactions('expense')" tabindex="0" role="button">
+      <mat-card class="kpi-card expense clickable" (click)="navigateToTransactions('expense')" (keydown.enter)="navigateToTransactions('expense')" (keydown.space)="$event.preventDefault(); navigateToTransactions('expense')" tabindex="0" role="button">
         <div class="kpi-top">
           <div class="kpi-icon"><mat-icon>trending_down</mat-icon></div>
           @if (expenseChange(); as change) {
@@ -171,7 +271,7 @@
         <span class="kpi-hint">{{ expenseChange() ? ('dashboard.vsLastMonth' | translate) : ('dashboard.noPriorData' | translate) }}</span>
       </mat-card>
 
-      <mat-card class="kpi-card net clickable" (click)="navigateToTransactions()" tabindex="0" role="button">
+      <mat-card class="kpi-card net clickable" (click)="navigateToTransactions()" (keydown.enter)="navigateToTransactions()" (keydown.space)="$event.preventDefault(); navigateToTransactions()" tabindex="0" role="button">
         <div class="kpi-top">
           <div class="kpi-icon"><mat-icon>account_balance</mat-icon></div>
           @if (netChange(); as change) {
@@ -186,7 +286,7 @@
         <span class="kpi-hint">{{ netChange() ? ('dashboard.vsLastMonth' | translate) : ('dashboard.incomeMinusExpenses' | translate) }}</span>
       </mat-card>
 
-      <mat-card class="kpi-card savings clickable" (click)="navigateToTransactions()" tabindex="0" role="button">
+      <mat-card class="kpi-card savings clickable" (click)="navigateToTransactions()" (keydown.enter)="navigateToTransactions()" (keydown.space)="$event.preventDefault(); navigateToTransactions()" tabindex="0" role="button">
         <div class="kpi-top">
           <div class="kpi-icon"><mat-icon>savings</mat-icon></div>
           @if (savingsChange(); as change) {
@@ -243,7 +343,7 @@
     <div class="charts-row">
       <mat-card class="panel-card">
         <div class="panel-header">
-          <div><h3>{{ 'dashboard.expenseBreakdown' | translate }}</h3><span class="hint">{{ 'dashboard.byCategory' | translate: { period: periodLabel } }}</span></div>
+          <div><h3>{{ 'dashboard.expenseBreakdown' | translate }}</h3><span class="hint">{{ 'dashboard.byCategory' | translate: { period: periodLabel } }} · {{ 'dashboard.tapChartHint' | translate }}</span></div>
         </div>
         <app-chart
           [options]="expenseChartOptions()!"
@@ -252,7 +352,8 @@
           [emptyMessage]="'dashboard.emptyExpensesMessage' | translate"
           emptyIcon="donut_large"
           [actionLabel]="'dashboard.addTransaction' | translate"
-          (actionClick)="openAddTransaction()" />
+          (actionClick)="openAddTransaction()"
+          (dataPointClick)="onExpenseChartClick($event)" />
       </mat-card>
 
       <mat-card class="panel-card">

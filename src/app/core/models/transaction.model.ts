@@ -43,6 +43,7 @@ export interface Profile {
   avatar_url: string | null;
   currency: string;
   locale?: string | null;
+  savings_goal_target?: number | null;
   created_at?: string;
 }
 

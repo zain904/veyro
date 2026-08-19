@@ -1,0 +1,55 @@
+<h2 mat-dialog-title>
+  {{ (isEdit ? 'categories.editCategory' : 'categories.addCategory') | translate }}
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="category-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'categories.name' | translate }}</mat-label>
+      <input matInput formControlName="name">
+      @if (showError('name')) {
+        <mat-error>{{ 'categories.nameRequired' | translate }}</mat-error>
+      }
+    </mat-form-field>
+
+    @if (!isEdit) {
+      <mat-button-toggle-group formControlName="type" class="type-toggle">
+        <mat-button-toggle value="expense">{{ 'common.expense' | translate }}</mat-button-toggle>
+        <mat-button-toggle value="income">{{ 'common.income' | translate }}</mat-button-toggle>
+      </mat-button-toggle-group>
+    }
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'categories.icon' | translate }}</mat-label>
+      <mat-select formControlName="icon">
+        @for (icon of icons; track icon) {
+          <mat-option [value]="icon">
+            <mat-icon>{{ icon }}</mat-icon>
+            {{ icon }}
+          </mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <div class="color-picker">
+      <span class="color-label">{{ 'categories.color' | translate }}</span>
+      <div class="color-chips">
+        @for (c of colors; track c) {
+          <button
+            type="button"
+            class="color-chip"
+            [class.selected]="form.value.color === c"
+            [style.background]="c"
+            (click)="selectColor(c)"
+            [attr.aria-label]="c">
+          </button>
+        }
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()">{{ 'common.save' | translate }}</button>
+</mat-dialog-actions>

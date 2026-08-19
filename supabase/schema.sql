@@ -10,6 +10,7 @@ CREATE TABLE IF NOT EXISTS profiles (
   avatar_url TEXT,
   currency TEXT DEFAULT 'PKR',
   locale TEXT DEFAULT 'en',
+  savings_goal_target DECIMAL(12, 2),
   created_at TIMESTAMPTZ DEFAULT NOW(),
   updated_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -69,7 +70,7 @@ DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
 DROP POLICY IF EXISTS "Users can update own profile" ON profiles;
 DROP POLICY IF EXISTS "Users can insert own profile" ON profiles;
 CREATE POLICY "Users can view own profile" ON profiles FOR SELECT USING (auth.uid() = id);
-CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id);
+CREATE POLICY "Users can update own profile" ON profiles FOR UPDATE USING (auth.uid() = id) WITH CHECK (auth.uid() = id);
 CREATE POLICY "Users can insert own profile" ON profiles FOR INSERT WITH CHECK (auth.uid() = id);
 
 -- Categories policies
@@ -79,7 +80,7 @@ DROP POLICY IF EXISTS "Users can update own categories" ON categories;
 DROP POLICY IF EXISTS "Users can delete own categories" ON categories;
 CREATE POLICY "Users can view own categories" ON categories FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own categories" ON categories FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own categories" ON categories FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can update own categories" ON categories FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can delete own categories" ON categories FOR DELETE USING (auth.uid() = user_id);
 
 -- Transactions policies
@@ -89,7 +90,7 @@ DROP POLICY IF EXISTS "Users can update own transactions" ON transactions;
 DROP POLICY IF EXISTS "Users can delete own transactions" ON transactions;
 CREATE POLICY "Users can view own transactions" ON transactions FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own transactions" ON transactions FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own transactions" ON transactions FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can update own transactions" ON transactions FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can delete own transactions" ON transactions FOR DELETE USING (auth.uid() = user_id);
 
 -- Budgets policies
@@ -99,7 +100,7 @@ DROP POLICY IF EXISTS "Users can update own budgets" ON budgets;
 DROP POLICY IF EXISTS "Users can delete own budgets" ON budgets;
 CREATE POLICY "Users can view own budgets" ON budgets FOR SELECT USING (auth.uid() = user_id);
 CREATE POLICY "Users can insert own budgets" ON budgets FOR INSERT WITH CHECK (auth.uid() = user_id);
-CREATE POLICY "Users can update own budgets" ON budgets FOR UPDATE USING (auth.uid() = user_id);
+CREATE POLICY "Users can update own budgets" ON budgets FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can delete own budgets" ON budgets FOR DELETE USING (auth.uid() = user_id);
 -- Auto-create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
@@ -203,3 +204,31 @@ USING (
   bucket_id = 'avatars'
   AND auth.uid()::text = (storage.foldername(name))[1]
 );
+
+-- Delete all user data (Settings → Delete my data)
+CREATE OR REPLACE FUNCTION public.delete_user_data()
+RETURNS void
+LANGUAGE plpgsql
+SECURITY DEFINER
+SET search_path = public
+AS $$
+BEGIN
+  IF auth.uid() IS NULL THEN
+    RAISE EXCEPTION 'Not authenticated';
+  END IF;
+
+  DELETE FROM transactions WHERE user_id = auth.uid();
+  DELETE FROM budgets WHERE user_id = auth.uid();
+  DELETE FROM categories WHERE user_id = auth.uid();
+
+  UPDATE profiles
+  SET
+    full_name = 'User',
+    avatar_url = NULL,
+    savings_goal_target = NULL,
+    updated_at = NOW()
+  WHERE id = auth.uid();
+END;
+$$;
+
+GRANT EXECUTE ON FUNCTION public.delete_user_data() TO authenticated;

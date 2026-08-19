@@ -338,3 +338,22 @@ html[dir='rtl'] {
     text-align: end;
   }
 }
+
+.veyro-toast-success {
+  --mdc-snackbar-container-color: #166534;
+  --mdc-snackbar-supporting-text-color: #fff;
+}
+
+.veyro-toast-error {
+  --mdc-snackbar-container-color: #991b1b;
+  --mdc-snackbar-supporting-text-color: #fff;
+}
+
+.error-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px;
+  text-align: center;
+}

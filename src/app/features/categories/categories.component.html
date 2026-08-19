@@ -1,89 +1,107 @@
-<div class="categories-page">
-  <div class="veyro-page-header">
-    <div>
-      <nav class="breadcrumbs">
-        <span>{{ 'common.home' | translate }}</span>
-        <mat-icon>chevron_right</mat-icon>
-        <span class="current">{{ 'categories.title' | translate }}</span>
-      </nav>
-      <h1>{{ 'categories.title' | translate }}</h1>
-      <p class="subtitle">{{ 'categories.subtitle' | translate }} · {{ periodLabel }}</p>
-    </div>
-    <div class="header-actions">
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>{{ 'common.month' | translate }}</mat-label>
-        <mat-select [(ngModel)]="filterMonth" (ngModelChange)="load()">
-          @for (m of months; track m.value) {
-            <mat-option [value]="m.value">{{ getMonthLabel(m.value) }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-      <mat-form-field appearance="outline" class="filter-field">
-        <mat-label>{{ 'common.year' | translate }}</mat-label>
-        <mat-select [(ngModel)]="filterYear" (ngModelChange)="load()">
-          @for (y of years; track y) {
-            <mat-option [value]="y">{{ y }}</mat-option>
-          }
-        </mat-select>
-      </mat-form-field>
-    </div>
-  </div>
-
-  @if (loading()) {
-    <div class="skeleton-grid">
-      @for (i of [1,2,3,4]; track i) { <div class="skeleton-card"></div> }
-    </div>
-  } @else {
-    <div class="kpi-row">
-      <mat-card class="kpi-card neutral">
-        <span class="kpi-label">{{ 'categories.title' | translate }}</span>
-        <span class="kpi-value">{{ categories().length }}</span>
-      </mat-card>
-      <mat-card class="kpi-card expense">
-        <span class="kpi-label">{{ 'common.expense' | translate }}</span>
-        <span class="kpi-value">{{ expenseCategoryCount }}</span>
-        <span class="kpi-hint">{{ expenseTotal | veyroCurrency }}</span>
-      </mat-card>
-      <mat-card class="kpi-card income">
-        <span class="kpi-label">{{ 'common.income' | translate }}</span>
-        <span class="kpi-value">{{ incomeCategoryCount }}</span>
-        <span class="kpi-hint">{{ incomeTotal | veyroCurrency }}</span>
-      </mat-card>
-    </div>
-
-    <div class="type-tabs">
-      <button mat-stroked-button [class.active]="filterType === 'all'" (click)="filterType = 'all'">{{ 'common.all' | translate }}</button>
-      <button mat-stroked-button [class.active]="filterType === 'expense'" (click)="filterType = 'expense'">{{ 'common.expense' | translate }}</button>
-      <button mat-stroked-button [class.active]="filterType === 'income'" (click)="filterType = 'income'">{{ 'common.income' | translate }}</button>
-    </div>
-
-    <div class="cat-grid">
-      @for (cat of filteredCategories; track cat.id) {
-        <mat-card class="cat-card veyro-card">
-          <div class="cat-header">
-            <div class="cat-icon" [style.background]="cat.color + '22'" [style.color]="cat.color">
-              <mat-icon>{{ cat.icon }}</mat-icon>
-            </div>
-            <span class="type-badge" [class.expense]="cat.type === 'expense'" [class.income]="cat.type === 'income'">
-              {{ cat.type === 'income' ? ('common.income' | translate) : ('common.expense' | translate) }}
-            </span>
-          </div>
-          <h3>{{ cat.name }}</h3>
-          <div class="cat-amount">
-            @if (cat.type === 'expense') {
-              <span class="amount expense">{{ cat.spent | veyroCurrency }}</span>
-            } @else {
-              <span class="amount income">{{ cat.income | veyroCurrency }}</span>
-            }
-          </div>
-        </mat-card>
-      } @empty {
-        <app-empty-state
-          icon="category"
-          [title]="'categories.emptyTitle' | translate"
-          [message]="'categories.emptyMessage' | translate"
-          [card]="true" />
-      }
-    </div>
-  }
-</div>
+<div class="categories-page">
+  <div class="veyro-page-header">
+    <div>
+      <nav class="breadcrumbs">
+        <span>{{ 'common.home' | translate }}</span>
+        <mat-icon>chevron_right</mat-icon>
+        <span class="current">{{ 'categories.title' | translate }}</span>
+      </nav>
+      <h1>{{ 'categories.title' | translate }}</h1>
+      <p class="subtitle">{{ 'categories.subtitle' | translate }} · {{ periodLabel }}</p>
+    </div>
+    <div class="header-actions">
+      <button mat-flat-button color="primary" (click)="openDialog()">
+        <mat-icon>add</mat-icon>
+        {{ 'categories.addCategory' | translate }}
+      </button>
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'common.month' | translate }}</mat-label>
+        <mat-select [(ngModel)]="filterMonth" (ngModelChange)="load()">
+          @for (m of months; track m.value) {
+            <mat-option [value]="m.value">{{ getMonthLabel(m.value) }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+      <mat-form-field appearance="outline" class="filter-field">
+        <mat-label>{{ 'common.year' | translate }}</mat-label>
+        <mat-select [(ngModel)]="filterYear" (ngModelChange)="load()">
+          @for (y of years; track y) {
+            <mat-option [value]="y">{{ y }}</mat-option>
+          }
+        </mat-select>
+      </mat-form-field>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton-grid">
+      @for (i of [1,2,3,4]; track i) { <div class="skeleton-card"></div> }
+    </div>
+  } @else if (error()) {
+    <mat-card class="error-card panel-card">
+      <mat-icon>cloud_off</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-flat-button color="primary" (click)="load()">{{ 'common.tryAgain' | translate }}</button>
+    </mat-card>
+  } @else {
+    <div class="kpi-row">
+      <mat-card class="kpi-card neutral">
+        <span class="kpi-label">{{ 'categories.title' | translate }}</span>
+        <span class="kpi-value">{{ categories().length }}</span>
+      </mat-card>
+      <mat-card class="kpi-card expense">
+        <span class="kpi-label">{{ 'common.expense' | translate }}</span>
+        <span class="kpi-value">{{ expenseCategoryCount }}</span>
+        <span class="kpi-hint">{{ expenseTotal | veyroCurrency }}</span>
+      </mat-card>
+      <mat-card class="kpi-card income">
+        <span class="kpi-label">{{ 'common.income' | translate }}</span>
+        <span class="kpi-value">{{ incomeCategoryCount }}</span>
+        <span class="kpi-hint">{{ incomeTotal | veyroCurrency }}</span>
+      </mat-card>
+    </div>
+
+    <div class="type-tabs">
+      <button mat-stroked-button [class.active]="filterType === 'all'" (click)="filterType = 'all'">{{ 'common.all' | translate }}</button>
+      <button mat-stroked-button [class.active]="filterType === 'expense'" (click)="filterType = 'expense'">{{ 'common.expense' | translate }}</button>
+      <button mat-stroked-button [class.active]="filterType === 'income'" (click)="filterType = 'income'">{{ 'common.income' | translate }}</button>
+    </div>
+
+    <div class="cat-grid">
+      @for (cat of filteredCategories; track cat.id) {
+        <mat-card class="cat-card veyro-card">
+          <div class="cat-header">
+            <div class="cat-icon" [style.background]="cat.color + '22'" [style.color]="cat.color">
+              <mat-icon>{{ cat.icon }}</mat-icon>
+            </div>
+            <div class="cat-actions">
+              <span class="type-badge" [class.expense]="cat.type === 'expense'" [class.income]="cat.type === 'income'">
+                {{ cat.type === 'income' ? ('common.income' | translate) : ('common.expense' | translate) }}
+              </span>
+              <button mat-icon-button type="button" (click)="openDialog(cat)" [attr.aria-label]="'common.edit' | translate">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button type="button" color="warn" (click)="deleteCategory(cat)" [attr.aria-label]="'common.delete' | translate">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+          <h3>{{ cat.name }}</h3>
+          <div class="cat-amount">
+            @if (cat.type === 'expense') {
+              <span class="amount expense">{{ cat.spent | veyroCurrency }}</span>
+            } @else {
+              <span class="amount income">{{ cat.income | veyroCurrency }}</span>
+            }
+          </div>
+        </mat-card>
+      } @empty {
+        <app-empty-state
+          icon="category"
+          [title]="'categories.emptyTitle' | translate"
+          [message]="'categories.emptyMessage' | translate"
+          [card]="true" />
+      }
+    </div>
+  }
+</div>
