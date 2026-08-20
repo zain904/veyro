@@ -10,6 +10,10 @@
       <p class="subtitle">{{ periodLabel }} · {{ 'transactions.subtitle' | translate }}</p>
     </div>
     <div class="header-actions">
+      <button mat-stroked-button type="button" (click)="openTransferDialog()">
+        <mat-icon>swap_horiz</mat-icon>
+        {{ 'accounts.transfer' | translate }}
+      </button>
       <button mat-flat-button color="primary" (click)="openDialog()">
         <mat-icon>add</mat-icon>
         {{ 'transactions.addTransaction' | translate }}
@@ -31,6 +35,17 @@
           <mat-option value="">{{ 'common.all' | translate }}</mat-option>
           <mat-option value="income">{{ 'common.income' | translate }}</mat-option>
           <mat-option value="expense">{{ 'common.expense' | translate }}</mat-option>
+          <mat-option value="transfer">{{ 'accounts.transfer' | translate }}</mat-option>
+        </mat-select>
+      </mat-form-field>
+
+      <mat-form-field appearance="outline">
+        <mat-label>{{ 'accounts.account' | translate }}</mat-label>
+        <mat-select [(ngModel)]="filterAccount" (ngModelChange)="onFilterChange()">
+          <mat-option value="">{{ 'common.all' | translate }}</mat-option>
+          @for (acc of accounts(); track acc.id) {
+            <mat-option [value]="acc.id">{{ acc.name }}</mat-option>
+          }
         </mat-select>
       </mat-form-field>
 
@@ -107,23 +122,41 @@
           <mat-card class="transaction-group-card panel-card">
             @for (tx of group.items; track tx.id) {
               <div class="tx-row">
-                <div class="tx-icon-sm" [style.background]="(tx.category?.color ?? '#64748b') + '22'" [style.color]="tx.category?.color">
-                  <mat-icon>{{ tx.category?.icon || 'receipt' }}</mat-icon>
+                <div class="tx-icon-sm" [style.background]="((tx.type === 'transfer' ? tx.account?.color : tx.category?.color) ?? '#64748b') + '22'" [style.color]="tx.type === 'transfer' ? tx.account?.color : tx.category?.color">
+                  <mat-icon>{{ tx.type === 'transfer' ? 'swap_horiz' : (tx.category?.icon || 'receipt') }}</mat-icon>
                 </div>
                 <div class="tx-info-col">
-                  <span class="name">{{ tx.category?.name }}</span>
+                  <span class="name">
+                    @if (tx.type === 'transfer') {
+                      {{ transferLabel(tx) }}
+                    } @else {
+                      {{ tx.category?.name }}
+                    }
+                  </span>
                   @if (tx.description) {
                     <span class="meta">{{ tx.description }}</span>
                   }
-                  <span class="type-badge" [class.expense]="tx.type === 'expense'" [class.income]="tx.type === 'income'">{{ tx.type === 'income' ? ('common.income' | translate) : ('common.expense' | translate) }}</span>
+                  @if (tx.account && tx.type !== 'transfer') {
+                    <span class="meta">{{ tx.account.name }}</span>
+                  }
+                  <span class="type-badge" [class.expense]="tx.type === 'expense'" [class.income]="tx.type === 'income'" [class.transfer]="tx.type === 'transfer'">
+                    @if (tx.type === 'transfer') {
+                      {{ 'accounts.transfer' | translate }}
+                    } @else {
+                      {{ tx.type === 'income' ? ('common.income' | translate) : ('common.expense' | translate) }}
+                    }
+                  </span>
                 </div>
                 <div class="tx-actions-col">
-                  <span class="tx-amt" [class.income]="tx.type === 'income'" [class.expense]="tx.type === 'expense'">
-                    {{ tx.type === 'income' ? '+' : '−' }} {{ tx.amount | veyroCurrency }}
+                  <span class="tx-amt" [class.income]="tx.type === 'income'" [class.expense]="tx.type === 'expense'" [class.transfer]="tx.type === 'transfer'">
+                    @if (tx.type === 'income') { + } @else if (tx.type === 'expense') { − }
+                    {{ tx.amount | veyroCurrency }}
                   </span>
                   <div class="tx-actions">
-                    <button mat-icon-button (click)="openDialog(tx)"><mat-icon>edit</mat-icon></button>
-                    <button mat-icon-button color="warn" (click)="deleteTransaction(tx)"><mat-icon>delete</mat-icon></button>
+                    @if (tx.type !== 'transfer') {
+                      <button mat-icon-button (click)="openDialog(tx)" [attr.aria-label]="'common.edit' | translate"><mat-icon>edit</mat-icon></button>
+                    }
+                    <button mat-icon-button color="warn" (click)="deleteTransaction(tx)" [attr.aria-label]="'common.delete' | translate"><mat-icon>delete</mat-icon></button>
                   </div>
                 </div>
               </div>

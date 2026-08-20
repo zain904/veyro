@@ -2,9 +2,12 @@
   <div class="login-body">
   <div class="login-left">
     <div class="hero">
-      <div class="hero-icon">V</div>
-      <h1>Veyro</h1>
-      <p class="tagline">{{ 'auth.tagline' | translate }}</p>
+      <app-veyro-logo
+        variant="full"
+        size="lg"
+        [inverted]="true"
+        [showTagline]="true"
+        [tagline]="'auth.tagline' | translate" />
       <p class="description">
         {{ 'auth.description' | translate }}
       </p>
@@ -26,6 +29,10 @@
   </div>
 
   <div class="login-right">
+    <div class="mobile-brand">
+      <app-veyro-logo variant="full" size="md" [showTagline]="true" [tagline]="'auth.tagline' | translate" />
+    </div>
+
     <div class="lang-select">
       <mat-form-field appearance="outline" subscriptSizing="dynamic">
         <mat-label>{{ 'common.language' | translate }}</mat-label>

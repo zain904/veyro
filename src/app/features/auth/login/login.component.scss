@@ -27,30 +27,9 @@
 .hero {
   max-width: 420px;
 
-  .hero-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 16px;
-    background: rgba(255, 255, 255, 0.15);
-    backdrop-filter: blur(10px);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    font-size: 24px;
-    font-weight: 700;
+  app-veyro-logo {
+    display: block;
     margin-bottom: 24px;
-  }
-
-  h1 {
-    font-size: 42px;
-    font-weight: 700;
-    margin: 0 0 8px;
-  }
-
-  .tagline {
-    font-size: 18px;
-    opacity: 0.9;
-    margin: 0 0 24px;
   }
 
   .description {
@@ -90,6 +69,15 @@
   padding: 24px;
   background: var(--bg-color);
   position: relative;
+
+  .mobile-brand {
+    display: none;
+    margin-bottom: 24px;
+
+    @media (max-width: 900px) {
+      display: block;
+    }
+  }
 
   .lang-select {
     position: absolute;

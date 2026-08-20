@@ -15,7 +15,9 @@ import { TransactionService } from '../../core/services/transaction.service';
 import { CategoryService } from '../../core/services/category.service';
 import { DataRefreshService } from '../../core/services/data-refresh.service';
 import { LanguageService } from '../../core/services/language.service';
-import { Transaction, Category, TransactionType } from '../../core/models/transaction.model';
+import { AccountService } from '../../core/services/account.service';
+import { Transaction, Category, TransactionType, Account } from '../../core/models/transaction.model';
+import { TransferDialogComponent } from '../accounts/transfer-dialog/transfer-dialog.component';
 import { VeyroCurrencyPipe } from '../../shared/pipes/veyro-currency.pipe';
 import { TransactionDialogComponent } from './transaction-dialog/transaction-dialog.component';
 import { ConfirmDialogService } from '../../core/services/confirm-dialog.service';
@@ -48,10 +50,12 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   error = signal<string | null>(null);
   transactions = signal<Transaction[]>([]);
   categories = signal<Category[]>([]);
+  accounts = signal<Account[]>([]);
 
   searchQuery = '';
   filterType: TransactionType | '' = '';
   filterCategory = '';
+  filterAccount = '';
   filterMonth = new Date().getMonth() + 1;
   filterYear = new Date().getFullYear();
 
@@ -61,6 +65,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   constructor(
     private transactionService: TransactionService,
     private categoryService: CategoryService,
+    private accountService: AccountService,
     private dialog: MatDialog,
     private route: ActivatedRoute
   ) {}
@@ -102,20 +107,27 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   }
 
   async ngOnInit(): Promise<void> {
-    const cats = await this.categoryService.getCategories();
+    const [cats, accs] = await Promise.all([
+      this.categoryService.getCategories(),
+      this.accountService.getAccounts(),
+    ]);
     this.categories.set(cats);
+    this.accounts.set(accs);
 
     this.route.queryParamMap.subscribe(params => {
       const month = params.get('month');
       const year = params.get('year');
       const type = params.get('type') as TransactionType | null;
       const category = params.get('category');
+      const account = params.get('account');
       if (month) this.filterMonth = Number(month);
       if (year) this.filterYear = Number(year);
-      if (type === 'income' || type === 'expense') this.filterType = type;
+      if (type === 'income' || type === 'expense' || type === 'transfer') this.filterType = type;
       else if (type === null && !params.has('type')) this.filterType = '';
       if (category) this.filterCategory = category;
       else if (!params.has('category')) this.filterCategory = '';
+      if (account) this.filterAccount = account;
+      else if (!params.has('account')) this.filterAccount = '';
       this.loadTransactions();
     });
 
@@ -135,6 +147,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
       const data = await this.transactionService.getTransactions({
         type: this.filterType || undefined,
         categoryId: this.filterCategory || undefined,
+        accountId: this.filterAccount || undefined,
         search: this.searchQuery || undefined,
         month: this.filterMonth,
         year: this.filterYear,
@@ -153,6 +166,7 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   }
 
   openDialog(transaction?: Transaction): void {
+    if (transaction?.type === 'transfer') return;
     const ref = this.dialog.open(TransactionDialogComponent, {
       width: '440px',
       data: { transaction },
@@ -173,6 +187,36 @@ export class TransactionsComponent implements OnInit, OnDestroy {
         this.toast.error('errors.saveFailed');
       }
     });
+  }
+
+  openTransferDialog(): void {
+    const accs = this.accounts();
+    if (accs.length < 2) {
+      this.toast.message(this.lang.instant('accounts.needTwoAccounts'), 'error');
+      return;
+    }
+    const ref = this.dialog.open(TransferDialogComponent, {
+      width: '440px',
+      data: { accounts: accs },
+    });
+    ref.afterClosed().subscribe(async (result) => {
+      if (!result) return;
+      try {
+        await this.accountService.createTransfer(result);
+        this.toast.success('accounts.transferDone');
+        this.refresh.notify('transaction');
+        await this.loadTransactions();
+      } catch (err) {
+        console.error(err);
+        this.toast.error('errors.saveFailed');
+      }
+    });
+  }
+
+  transferLabel(tx: Transaction): string {
+    const from = tx.account?.name ?? '—';
+    const to = tx.transfer_to_account?.name ?? '—';
+    return `${from} → ${to}`;
   }
 
   async deleteTransaction(tx: Transaction): Promise<void> {

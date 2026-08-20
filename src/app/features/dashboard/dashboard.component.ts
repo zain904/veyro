@@ -19,7 +19,8 @@ import { ProfileService } from '../../core/services/profile.service';
 import { CurrencyService } from '../../core/services/currency.service';
 import { LanguageService } from '../../core/services/language.service';
 import { ToastService } from '../../core/services/toast.service';
-import { Transaction, Budget } from '../../core/models/transaction.model';
+import { AccountService } from '../../core/services/account.service';
+import { Account, Transaction, Budget } from '../../core/models/transaction.model';
 import { MetricChange, buildChange } from '../../core/models/report.model';
 import { VeyroCurrencyPipe } from '../../shared/pipes/veyro-currency.pipe';
 import { ChartComponent } from '../../shared/components/chart/chart.component';
@@ -75,6 +76,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
   private lang = inject(LanguageService);
   private translate = inject(TranslateService);
   private toast = inject(ToastService);
+  private accountService = inject(AccountService);
   private sub?: Subscription;
   private langSub?: Subscription;
   private dataLoaded = false;
@@ -116,6 +118,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
   savingsGoalTarget = signal(0);
   monthlySavingsSaved = signal(0);
   expenseCategories = signal<CategoryChartItem[]>([]);
+  accounts = signal<Account[]>([]);
+  totalAccountsBalance = signal(0);
 
   filterMonth = new Date().getMonth() + 1;
   filterYear = new Date().getFullYear();
@@ -322,6 +326,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         todayExpenses,
         hasIncome,
         daysSinceLast,
+        accountsWithBalances,
       ] = await Promise.all([
         this.transactionService.hasAnyTransactions(),
         this.transactionService.getMonthlyStats(this.filterMonth, this.filterYear),
@@ -335,6 +340,7 @@ export class DashboardComponent implements OnInit, OnDestroy {
         this.transactionService.getTodayExpenses(),
         this.transactionService.hasIncomeInMonth(this.filterMonth, this.filterYear),
         this.transactionService.getDaysSinceLastTransaction(),
+        this.accountService.getAccountsWithBalances(),
       ]);
 
       this.hasAnyData.set(anyData);
@@ -357,6 +363,8 @@ export class DashboardComponent implements OnInit, OnDestroy {
       this.recentTransactions.set(recent);
       this.recentAllTime.set(recentGlobal);
       this.expenseCategories.set(categoryExpenses);
+      this.accounts.set(accountsWithBalances);
+      this.totalAccountsBalance.set(accountsWithBalances.reduce((s, a) => s + (a.balance ?? 0), 0));
       this.budgets.set(sortBudgetsByUrgency(budgets).slice(0, 4));
       this.allBudgetsCount.set(budgets.length);
       this.budgetAlerts.set(budgets.filter(b => (b.percentage ?? 0) >= 90));

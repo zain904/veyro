@@ -12,6 +12,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { LanguageService } from '../../../core/services/language.service';
 import { AppLanguage } from '../../../core/utils/locale.util';
 import { AppFooterComponent } from '../../../shared/components/footer/app-footer.component';
+import { VeyroLogoComponent } from '../../../shared/components/veyro-logo/veyro-logo.component';
 
 @Component({
   selector: 'app-login',
@@ -27,6 +28,7 @@ import { AppFooterComponent } from '../../../shared/components/footer/app-footer
     MatSelectModule,
     TranslatePipe,
     AppFooterComponent,
+    VeyroLogoComponent,
   ],
   templateUrl: './login.component.html',
   styleUrl: './login.component.scss',

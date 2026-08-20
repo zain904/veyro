@@ -1,0 +1,14 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 180 48" fill="none">
+  <defs>
+    <linearGradient id="veyro-grad" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" stop-color="#0d9488"/>
+      <stop offset="100%" stop-color="#14b8a6"/>
+    </linearGradient>
+  </defs>
+  <rect width="48" height="48" rx="14" fill="url(#veyro-grad)"/>
+  <path d="M13 34 L24 16 L35 34" stroke="#fff" stroke-width="3.6" stroke-linecap="round" stroke-linejoin="round"/>
+  <path d="M24 16 L31 10 L40 14" stroke="#fff" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round" opacity="0.92"/>
+  <circle cx="40" cy="14" r="2.6" fill="#fff"/>
+  <path d="M12 38 H36" stroke="#fff" stroke-width="2.2" stroke-linecap="round" opacity="0.55"/>
+  <text x="58" y="31" font-family="Inter, Segoe UI, Arial, sans-serif" font-size="22" font-weight="700" fill="#0f172a">Veyro</text>
+</svg>

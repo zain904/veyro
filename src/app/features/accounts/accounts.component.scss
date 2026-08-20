@@ -1,0 +1,108 @@
+.accounts-page {
+  .header-actions {
+    display: flex;
+    gap: 10px;
+    flex-wrap: wrap;
+  }
+}
+
+.total-card {
+  padding: 24px !important;
+  margin-bottom: 20px;
+  text-align: center;
+}
+
+.total-label {
+  display: block;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+  color: var(--text-secondary);
+}
+
+.total-value {
+  display: block;
+  font-size: clamp(28px, 5vw, 36px);
+  font-weight: 800;
+  color: var(--primary-color);
+  margin: 8px 0;
+}
+
+.total-hint {
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.accounts-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 16px;
+}
+
+.account-card {
+  padding: 20px !important;
+  border-top: 3px solid var(--acc-color, var(--primary-color));
+
+  h3 {
+    margin: 12px 0 4px;
+    font-size: 18px;
+    font-weight: 700;
+  }
+}
+
+.acc-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+}
+
+.acc-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.acc-actions {
+  display: flex;
+  align-items: center;
+  gap: 2px;
+}
+
+.default-badge {
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 4px 8px;
+  border-radius: 999px;
+  background: var(--primary-light);
+  color: var(--primary-color);
+  margin-right: 4px;
+}
+
+.bank-name {
+  margin: 0 0 12px;
+  font-size: 13px;
+  color: var(--text-secondary);
+}
+
+.acc-balance {
+  font-size: 24px;
+  font-weight: 800;
+  margin: 0 0 12px;
+  color: var(--primary-color);
+
+  &.negative { color: var(--expense-color); }
+}
+
+.error-card {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  padding: 32px;
+  text-align: center;
+}

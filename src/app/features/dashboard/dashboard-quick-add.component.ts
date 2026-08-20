@@ -9,6 +9,7 @@ import { FormsModule } from '@angular/forms';
 import { TranslatePipe } from '@ngx-translate/core';
 import { LanguageService } from '../../core/services/language.service';
 import { CategoryService } from '../../core/services/category.service';
+import { AccountService } from '../../core/services/account.service';
 import { TransactionService } from '../../core/services/transaction.service';
 import { DataRefreshService } from '../../core/services/data-refresh.service';
 import { Category, Transaction } from '../../core/models/transaction.model';
@@ -28,6 +29,7 @@ import { VeyroCurrencyPipe } from '../../shared/pipes/veyro-currency.pipe';
 })
 export class DashboardQuickAddComponent implements OnInit {
   private categoryService = inject(CategoryService);
+  private accountService = inject(AccountService);
   private transactionService = inject(TransactionService);
   private refresh = inject(DataRefreshService);
   private toast = inject(ToastService);
@@ -38,6 +40,7 @@ export class DashboardQuickAddComponent implements OnInit {
 
   amount: number | null = null;
   selectedCategoryId = signal<string | null>(null);
+  defaultAccountId = signal<string | null>(null);
   frequentCategories = signal<Category[]>([]);
   lastExpense = signal<Transaction | null>(null);
   saving = signal(false);
@@ -49,12 +52,14 @@ export class DashboardQuickAddComponent implements OnInit {
 
   async loadCategories(): Promise<void> {
     try {
-      const [frequent, last] = await Promise.all([
+      const [frequent, last, defaultAcc] = await Promise.all([
         this.transactionService.getFrequentExpenseCategories(6),
         this.transactionService.getLastExpense(),
+        this.accountService.getDefaultAccount(),
       ]);
       this.frequentCategories.set(frequent);
       this.lastExpense.set(last);
+      this.defaultAccountId.set(defaultAcc.id);
       if (frequent.length > 0 && !this.selectedCategoryId()) {
         this.selectedCategoryId.set(frequent[0].id);
       }
@@ -81,6 +86,7 @@ export class DashboardQuickAddComponent implements OnInit {
         type: 'expense',
         amount,
         category_id: categoryId,
+        account_id: this.defaultAccountId() ?? undefined,
         transaction_date: new Date().toISOString().slice(0, 10),
       });
       this.amount = null;
@@ -104,6 +110,7 @@ export class DashboardQuickAddComponent implements OnInit {
         type: 'expense',
         amount: last.amount,
         category_id: last.category_id,
+        account_id: last.account_id ?? this.defaultAccountId() ?? undefined,
         description: last.description ?? undefined,
         transaction_date: new Date().toISOString().slice(0, 10),
       });

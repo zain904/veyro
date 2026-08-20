@@ -42,6 +42,7 @@ npm install
    - `supabase/patch-savings-goal.sql`
    - `supabase/patch-delete-user-data.sql`
    - `supabase/patch-rls-with-check.sql`
+   - `supabase/patch-accounts.sql`
 4. Copy your project URL and anon key from **Settings → API**
 
 ### 3. Configure environment

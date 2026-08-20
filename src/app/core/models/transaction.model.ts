@@ -1,4 +1,23 @@
-export type TransactionType = 'income' | 'expense';
+export type TransactionType = 'income' | 'expense' | 'transfer';
+
+export type AccountType = 'bank' | 'cash' | 'wallet' | 'other';
+
+export interface Account {
+  id: string;
+  user_id: string;
+  name: string;
+  bank_name: string | null;
+  color: string;
+  icon: string;
+  account_type: AccountType;
+  opening_balance: number;
+  is_default: boolean;
+  is_archived: boolean;
+  sort_order: number;
+  created_at?: string;
+  updated_at?: string;
+  balance?: number;
+}
 
 export interface Category {
   id: string;
@@ -14,6 +33,8 @@ export interface Transaction {
   id: string;
   user_id: string;
   category_id: string | null;
+  account_id: string | null;
+  transfer_to_account_id: string | null;
   amount: number;
   type: TransactionType;
   description: string | null;
@@ -21,6 +42,8 @@ export interface Transaction {
   created_at?: string;
   updated_at?: string;
   category?: Category;
+  account?: Account;
+  transfer_to_account?: Account;
 }
 
 export interface Budget {

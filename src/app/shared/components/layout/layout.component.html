@@ -13,13 +13,11 @@
     class="sidenav"
     [class.collapsed]="sidebarCollapsed() && !isHandset">
     <div class="brand">
-      <div class="brand-icon">V</div>
-      @if (!sidebarCollapsed() || isHandset) {
-        <div class="brand-text">
-          <span class="brand-name">Veyro</span>
-          <span class="brand-tagline">{{ 'layout.tagline' | translate }}</span>
-        </div>
-      }
+      <app-veyro-logo
+        [variant]="(!sidebarCollapsed() || isHandset) ? 'full' : 'mark'"
+        size="md"
+        [showTagline]="!sidebarCollapsed() || isHandset"
+        [tagline]="'layout.tagline' | translate" />
     </div>
 
     <mat-nav-list class="nav-list">
@@ -58,6 +56,7 @@
         <button mat-icon-button (click)="drawer.toggle()" [attr.aria-label]="'layout.openMenu' | translate">
           <mat-icon>menu</mat-icon>
         </button>
+        <app-veyro-logo variant="full" size="sm" [showTagline]="false" class="toolbar-brand" />
       }
 
       <span class="toolbar-spacer"></span>

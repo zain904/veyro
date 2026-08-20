@@ -1,0 +1,62 @@
+<h2 mat-dialog-title>
+  {{ (isEdit ? 'accounts.editAccount' : 'accounts.addAccount') | translate }}
+</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" class="account-form">
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'accounts.accountName' | translate }}</mat-label>
+      <input matInput formControlName="name" [placeholder]="'accounts.accountNameHint' | translate">
+      @if (showError('name')) {
+        <mat-error>{{ 'accounts.nameRequired' | translate }}</mat-error>
+      }
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'accounts.bank' | translate }}</mat-label>
+      <mat-select formControlName="bank_preset" (selectionChange)="onBankChange($event.value)">
+        @for (bank of banks; track bank.code) {
+          <mat-option [value]="bank.code">{{ bank.name }}</mat-option>
+        }
+        <mat-option value="custom">{{ 'accounts.customBank' | translate }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    @if (useCustomBank()) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'accounts.customBankName' | translate }}</mat-label>
+        <input matInput formControlName="custom_bank">
+      </mat-form-field>
+    }
+
+    <mat-button-toggle-group formControlName="account_type" class="type-toggle">
+      <mat-button-toggle value="bank">{{ 'accounts.typeBank' | translate }}</mat-button-toggle>
+      <mat-button-toggle value="cash">{{ 'accounts.typeCash' | translate }}</mat-button-toggle>
+      <mat-button-toggle value="wallet">{{ 'accounts.typeWallet' | translate }}</mat-button-toggle>
+      <mat-button-toggle value="other">{{ 'accounts.typeOther' | translate }}</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    @if (!isEdit) {
+      <mat-form-field appearance="outline" class="full-width">
+        <mat-label>{{ 'accounts.openingBalance' | translate }}</mat-label>
+        <input matInput type="number" step="0.01" formControlName="opening_balance">
+        <span matTextPrefix>{{ currencyService.prefix() }}&nbsp;</span>
+      </mat-form-field>
+    }
+
+    <div class="color-picker">
+      <span class="color-label">{{ 'accounts.color' | translate }}</span>
+      <div class="color-chips">
+        @for (c of colors; track c) {
+          <button type="button" class="color-chip" [class.selected]="form.value.color === c"
+            [style.background]="c" (click)="selectColor(c)"></button>
+        }
+      </div>
+    </div>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()">{{ 'common.cancel' | translate }}</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()">{{ 'common.save' | translate }}</button>
+</mat-dialog-actions>

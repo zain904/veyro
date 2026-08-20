@@ -1,0 +1,17 @@
+.transfer-form {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  min-width: 340px;
+  padding-top: 8px;
+}
+
+.full-width { width: 100%; }
+
+.transfer-arrow {
+  display: flex;
+  justify-content: center;
+  color: var(--text-secondary);
+
+  mat-icon { font-size: 28px; width: 28px; height: 28px; }
+}

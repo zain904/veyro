@@ -1,60 +1,69 @@
-<h2 mat-dialog-title>{{ isEdit ? ('dialogs.transactionEdit' | translate) : ('dialogs.transactionAdd' | translate) }}</h2>
-
-<mat-dialog-content>
-  <form [formGroup]="form" (ngSubmit)="save()">
-    <label class="field-label">{{ 'transactions.type' | translate }} <span class="required">*</span></label>
-    <mat-button-toggle-group formControlName="type" class="type-toggle">
-      <mat-button-toggle value="expense">{{ 'common.expense' | translate }}</mat-button-toggle>
-      <mat-button-toggle value="income">{{ 'common.income' | translate }}</mat-button-toggle>
-    </mat-button-toggle-group>
-
-    <label class="field-label" for="tx-amount">{{ 'dialogs.amount' | translate }} <span class="required">*</span></label>
-    <mat-form-field appearance="outline" class="full-width">
-      <input matInput id="tx-amount" formControlName="amount" type="number" min="0.01" step="0.01" placeholder="0.00">
-      <span matTextPrefix>{{ currencyService.prefix() }}&nbsp;</span>
-    </mat-form-field>
-
-    <label class="field-label" for="tx-category">{{ 'dialogs.category' | translate }} <span class="required">*</span></label>
-    <mat-form-field appearance="outline" class="full-width">
-      <mat-select id="tx-category" formControlName="category_id" [disabled]="loadingCategories() || categories().length === 0">
-        @if (loadingCategories()) {
-          <mat-option disabled>{{ 'dialogs.loadingCategories' | translate }}</mat-option>
-        } @else {
-          @for (cat of categories(); track cat.id) {
-            <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
-          }
-        }
-      </mat-select>
-    </mat-form-field>
-
-    @if (categoriesError()) {
-      <div class="categories-error">
-        <mat-icon>warning</mat-icon>
-        {{ categoriesError() }}
-      </div>
-    }
-
-    <label class="field-label" for="tx-description">{{ 'dialogs.description' | translate }}</label>
-    <mat-form-field appearance="outline" class="full-width">
-      <input matInput id="tx-description" formControlName="description" placeholder="Optional note">
-    </mat-form-field>
-
-    <label class="field-label" for="tx-date">{{ 'dialogs.date' | translate }} <span class="required">*</span></label>
-    <mat-form-field appearance="outline" class="full-width">
-      <input matInput id="tx-date" [matDatepicker]="picker" formControlName="transaction_date">
-      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
-      <mat-datepicker #picker panelClass="veyro-datepicker"></mat-datepicker>
-    </mat-form-field>
-  </form>
-</mat-dialog-content>
-
-<mat-dialog-actions align="end">
-  <button mat-button type="button" (click)="cancel()" [disabled]="submitting()">{{ 'common.cancel' | translate }}</button>
-  <button mat-flat-button color="primary" type="button" (click)="save()" [disabled]="submitting()">
-    @if (submitting()) {
-      <mat-spinner diameter="18"></mat-spinner>
-    } @else {
-      {{ isEdit ? ('common.save' | translate) : ('common.add' | translate) }}
-    }
-  </button>
-</mat-dialog-actions>
+<h2 mat-dialog-title>{{ isEdit ? ('dialogs.transactionEdit' | translate) : ('dialogs.transactionAdd' | translate) }}</h2>
+
+<mat-dialog-content>
+  <form [formGroup]="form" (ngSubmit)="save()">
+    <label class="field-label">{{ 'transactions.type' | translate }} <span class="required">*</span></label>
+    <mat-button-toggle-group formControlName="type" class="type-toggle">
+      <mat-button-toggle value="expense">{{ 'common.expense' | translate }}</mat-button-toggle>
+      <mat-button-toggle value="income">{{ 'common.income' | translate }}</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <label class="field-label" for="tx-amount">{{ 'dialogs.amount' | translate }} <span class="required">*</span></label>
+    <mat-form-field appearance="outline" class="full-width">
+      <input matInput id="tx-amount" formControlName="amount" type="number" min="0.01" step="0.01" placeholder="0.00">
+      <span matTextPrefix>{{ currencyService.prefix() }}&nbsp;</span>
+    </mat-form-field>
+
+    <label class="field-label" for="tx-category">{{ 'dialogs.category' | translate }} <span class="required">*</span></label>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-select id="tx-category" formControlName="category_id" [disabled]="loadingCategories() || categories().length === 0">
+        @if (loadingCategories()) {
+          <mat-option disabled>{{ 'dialogs.loadingCategories' | translate }}</mat-option>
+        } @else {
+          @for (cat of categories(); track cat.id) {
+            <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+          }
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <label class="field-label" for="tx-account">{{ 'accounts.account' | translate }} <span class="required">*</span></label>
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-select id="tx-account" formControlName="account_id">
+        @for (acc of accounts(); track acc.id) {
+          <mat-option [value]="acc.id">{{ acc.name }} · {{ acc.bank_name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    @if (categoriesError()) {
+      <div class="categories-error">
+        <mat-icon>warning</mat-icon>
+        {{ categoriesError() }}
+      </div>
+    }
+
+    <label class="field-label" for="tx-description">{{ 'dialogs.description' | translate }}</label>
+    <mat-form-field appearance="outline" class="full-width">
+      <input matInput id="tx-description" formControlName="description" placeholder="Optional note">
+    </mat-form-field>
+
+    <label class="field-label" for="tx-date">{{ 'dialogs.date' | translate }} <span class="required">*</span></label>
+    <mat-form-field appearance="outline" class="full-width">
+      <input matInput id="tx-date" [matDatepicker]="picker" formControlName="transaction_date">
+      <mat-datepicker-toggle matIconSuffix [for]="picker"></mat-datepicker-toggle>
+      <mat-datepicker #picker panelClass="veyro-datepicker"></mat-datepicker>
+    </mat-form-field>
+  </form>
+</mat-dialog-content>
+
+<mat-dialog-actions align="end">
+  <button mat-button type="button" (click)="cancel()" [disabled]="submitting()">{{ 'common.cancel' | translate }}</button>
+  <button mat-flat-button color="primary" type="button" (click)="save()" [disabled]="submitting()">
+    @if (submitting()) {
+      <mat-spinner diameter="18"></mat-spinner>
+    } @else {
+      {{ isEdit ? ('common.save' | translate) : ('common.add' | translate) }}
+    }
+  </button>
+</mat-dialog-actions>

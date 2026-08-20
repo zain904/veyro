@@ -30,6 +30,7 @@ import { AuthService } from '../../../core/services/auth.service';
 import { ThemeService } from '../../../core/services/theme.service';
 
 import { CategoryService } from '../../../core/services/category.service';
+import { AccountService } from '../../../core/services/account.service';
 
 import { ProfileService } from '../../../core/services/profile.service';
 
@@ -48,6 +49,7 @@ import { AsyncPipe } from '@angular/common';
 
 import { AppFooterComponent } from '../footer/app-footer.component';
 import { UserAvatarComponent } from '../user-avatar/user-avatar.component';
+import { VeyroLogoComponent } from '../veyro-logo/veyro-logo.component';
 import { QuickToolsDialogComponent, QuickToolsResult } from '../quick-tools/quick-tools-dialog.component';
 import { TransactionDialogComponent } from '../../../features/transactions/transaction-dialog/transaction-dialog.component';
 import { TransactionService } from '../../../core/services/transaction.service';
@@ -77,7 +79,7 @@ const MOBILE_BREAKPOINT = '(max-width: 767px)';
     MatIconModule, MatButtonModule, MatMenuModule, MatTooltipModule,
 
     MatDialogModule, AsyncPipe, TranslatePipe, Dir,
-    AppFooterComponent, UserAvatarComponent,
+    AppFooterComponent, UserAvatarComponent, VeyroLogoComponent,
   ],
 
   templateUrl: './layout.component.html',
@@ -144,6 +146,8 @@ export class LayoutComponent implements OnInit, OnDestroy, AfterViewInit {
 
     { labelKey: 'nav.transactions', icon: 'receipt_long', route: '/transactions' },
 
+    { labelKey: 'nav.accounts', icon: 'account_balance', route: '/accounts' },
+
     { labelKey: 'nav.budgets', icon: 'account_balance_wallet', route: '/budgets' },
 
     { labelKey: 'nav.reports', icon: 'bar_chart', route: '/reports' },
@@ -161,6 +165,7 @@ export class LayoutComponent implements OnInit, OnDestroy, AfterViewInit {
     private breakpointObserver: BreakpointObserver,
 
     private categoryService: CategoryService,
+    private accountService: AccountService,
 
     private profileService: ProfileService,
 
@@ -199,6 +204,7 @@ export class LayoutComponent implements OnInit, OnDestroy, AfterViewInit {
     try {
 
       await this.categoryService.initializeForCurrentUser();
+      await this.accountService.initializeForCurrentUser();
 
       await Promise.all([this.loadProfileView(), this.currencyService.loadCurrency()]);
       this.sub = this.refresh.refresh$.subscribe(reason => {

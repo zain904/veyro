@@ -2,9 +2,17 @@ import { Injectable } from '@angular/core';
 import { SupabaseService } from './supabase.service';
 import { Category, Transaction, TransactionType } from '../models/transaction.model';
 
+const TX_SELECT = `
+  *,
+  category:categories(*),
+  account:accounts!account_id(*),
+  transfer_to_account:accounts!transfer_to_account_id(*)
+`;
+
 export interface TransactionFilters {
   type?: TransactionType;
   categoryId?: string;
+  accountId?: string;
   search?: string;
   month?: number;
   year?: number;
@@ -19,7 +27,7 @@ export class TransactionService {
   async getTransactions(filters?: TransactionFilters): Promise<Transaction[]> {
     let query = this.supabase.client
       .from('transactions')
-      .select('*, category:categories(*)')
+      .select(TX_SELECT)
       .order('transaction_date', { ascending: false });
 
     if (filters?.type) {
@@ -27,6 +35,9 @@ export class TransactionService {
     }
     if (filters?.categoryId) {
       query = query.eq('category_id', filters.categoryId);
+    }
+    if (filters?.accountId) {
+      query = query.or(`account_id.eq.${filters.accountId},transfer_to_account_id.eq.${filters.accountId}`);
     }
     if (filters?.search) {
       query = query.ilike('description', `%${filters.search}%`);
@@ -53,7 +64,7 @@ export class TransactionService {
   async getRecentTransactions(limit = 5, month?: number, year?: number): Promise<Transaction[]> {
     let query = this.supabase.client
       .from('transactions')
-      .select('*, category:categories(*)')
+      .select(TX_SELECT)
       .order('transaction_date', { ascending: false })
       .limit(limit);
 
@@ -105,7 +116,7 @@ export class TransactionService {
         ...transaction,
         user_id: this.supabase.currentUser!.id,
       })
-      .select('*, category:categories(*)')
+      .select(TX_SELECT)
       .single();
 
     if (error) throw error;
@@ -117,7 +128,7 @@ export class TransactionService {
       .from('transactions')
       .update(updates)
       .eq('id', id)
-      .select('*, category:categories(*)')
+      .select(TX_SELECT)
       .single();
 
     if (error) throw error;

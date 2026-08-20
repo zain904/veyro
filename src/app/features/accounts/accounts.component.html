@@ -1,0 +1,79 @@
+<div class="accounts-page">
+  <div class="veyro-page-header">
+    <div>
+      <nav class="breadcrumbs">
+        <span>{{ 'common.home' | translate }}</span>
+        <mat-icon>chevron_right</mat-icon>
+        <span class="current">{{ 'accounts.title' | translate }}</span>
+      </nav>
+      <h1>{{ 'accounts.title' | translate }}</h1>
+      <p class="subtitle">{{ 'accounts.subtitle' | translate }}</p>
+    </div>
+    <div class="header-actions">
+      <button mat-stroked-button type="button" (click)="openTransferDialog()">
+        <mat-icon>swap_horiz</mat-icon>
+        {{ 'accounts.transfer' | translate }}
+      </button>
+      <button mat-flat-button color="primary" (click)="openAccountDialog()">
+        <mat-icon>add</mat-icon>
+        {{ 'accounts.addAccount' | translate }}
+      </button>
+    </div>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton-grid">
+      @for (i of [1,2,3]; track i) { <div class="skeleton-card"></div> }
+    </div>
+  } @else if (error()) {
+    <mat-card class="error-card panel-card">
+      <mat-icon>cloud_off</mat-icon>
+      <p>{{ error() }}</p>
+      <button mat-flat-button color="primary" (click)="load()">{{ 'common.tryAgain' | translate }}</button>
+    </mat-card>
+  } @else {
+    <mat-card class="total-card panel-card">
+      <span class="total-label">{{ 'accounts.totalBalance' | translate }}</span>
+      <span class="total-value">{{ totalBalance() | veyroCurrency }}</span>
+      <span class="total-hint">{{ 'accounts.totalHint' | translate: { count: accounts().length } }}</span>
+    </mat-card>
+
+    <div class="accounts-grid">
+      @for (acc of accounts(); track acc.id) {
+        <mat-card class="account-card veyro-card" [style.--acc-color]="acc.color">
+          <div class="acc-top">
+            <div class="acc-icon" [style.background]="acc.color + '22'" [style.color]="acc.color">
+              <mat-icon>{{ acc.icon || 'account_balance' }}</mat-icon>
+            </div>
+            <div class="acc-actions">
+              @if (acc.is_default) {
+                <span class="default-badge">{{ 'accounts.default' | translate }}</span>
+              }
+              <button mat-icon-button type="button" (click)="openAccountDialog(acc)" [attr.aria-label]="'common.edit' | translate">
+                <mat-icon>edit</mat-icon>
+              </button>
+              @if (!acc.is_default) {
+                <button mat-icon-button type="button" color="warn" (click)="deleteAccount(acc)" [attr.aria-label]="'common.delete' | translate">
+                  <mat-icon>delete</mat-icon>
+                </button>
+              }
+            </div>
+          </div>
+          <h3>{{ acc.name }}</h3>
+          <p class="bank-name">{{ acc.bank_name || ('accounts.typeOther' | translate) }}</p>
+          <p class="acc-balance" [class.negative]="(acc.balance ?? 0) < 0">{{ acc.balance ?? 0 | veyroCurrency }}</p>
+          <a mat-button color="primary" routerLink="/transactions" [queryParams]="{ account: acc.id }">
+            {{ 'accounts.viewTransactions' | translate }}
+          </a>
+        </mat-card>
+      } @empty {
+        <app-empty-state
+          icon="account_balance"
+          [title]="'accounts.emptyTitle' | translate"
+          [message]="'accounts.emptyMessage' | translate"
+          [actionLabel]="'accounts.addAccount' | translate"
+          (actionClick)="openAccountDialog()" />
+      }
+    </div>
+  }
+</div>

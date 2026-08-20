@@ -136,6 +136,30 @@
       </p>
     </section>
 
+    @if (accounts().length > 0) {
+      <section class="accounts-row panel-card veyro-card">
+        <div class="accounts-row-header">
+          <div>
+            <h3>{{ 'accounts.yourAccounts' | translate }}</h3>
+            <span class="hint">{{ 'accounts.totalBalance' | translate }}: {{ totalAccountsBalance() | veyroCurrency }}</span>
+          </div>
+          <a mat-button color="primary" routerLink="/accounts">{{ 'dashboard.viewAll' | translate }}</a>
+        </div>
+        <div class="accounts-scroll">
+          @for (acc of accounts(); track acc.id) {
+            <a class="account-chip" [routerLink]="['/transactions']" [queryParams]="{ account: acc.id }" [style.--acc-color]="acc.color">
+              <div class="chip-icon" [style.background]="acc.color + '22'" [style.color]="acc.color">
+                <mat-icon>{{ acc.icon || 'account_balance' }}</mat-icon>
+              </div>
+              <span class="chip-name">{{ acc.name }}</span>
+              <span class="chip-bank">{{ acc.bank_name }}</span>
+              <span class="chip-balance" [class.negative]="(acc.balance ?? 0) < 0">{{ acc.balance ?? 0 | veyroCurrency }}</span>
+            </a>
+          }
+        </div>
+      </section>
+    }
+
     @if (monthSummary(); as summary) {
       <p class="summary-line">{{ summary.key | translate: summary.params }}</p>
     }

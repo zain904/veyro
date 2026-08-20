@@ -27,13 +27,32 @@ CREATE TABLE IF NOT EXISTS categories (
   UNIQUE(user_id, name, type)
 );
 
+-- Bank / wallet accounts
+CREATE TABLE IF NOT EXISTS accounts (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  name TEXT NOT NULL,
+  bank_name TEXT,
+  color TEXT DEFAULT '#6366f1',
+  icon TEXT DEFAULT 'account_balance',
+  account_type TEXT NOT NULL DEFAULT 'bank' CHECK (account_type IN ('bank', 'cash', 'wallet', 'other')),
+  opening_balance DECIMAL(12, 2) NOT NULL DEFAULT 0,
+  is_default BOOLEAN NOT NULL DEFAULT false,
+  is_archived BOOLEAN NOT NULL DEFAULT false,
+  sort_order INTEGER NOT NULL DEFAULT 0,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Transactions
 CREATE TABLE IF NOT EXISTS transactions (
   id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
   user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
   category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
+  account_id UUID REFERENCES accounts(id) ON DELETE SET NULL,
+  transfer_to_account_id UUID REFERENCES accounts(id) ON DELETE SET NULL,
   amount DECIMAL(12, 2) NOT NULL CHECK (amount > 0),
-  type TEXT NOT NULL CHECK (type IN ('income', 'expense')),
+  type TEXT NOT NULL CHECK (type IN ('income', 'expense', 'transfer')),
   description TEXT,
   transaction_date DATE NOT NULL DEFAULT CURRENT_DATE,
   created_at TIMESTAMPTZ DEFAULT NOW(),
@@ -58,12 +77,16 @@ CREATE INDEX IF NOT EXISTS idx_transactions_user_date ON transactions(user_id, t
 CREATE INDEX IF NOT EXISTS idx_transactions_user_type ON transactions(user_id, type);
 CREATE INDEX IF NOT EXISTS idx_budgets_user_period ON budgets(user_id, year, month);
 CREATE INDEX IF NOT EXISTS idx_categories_user ON categories(user_id);
+CREATE INDEX IF NOT EXISTS idx_accounts_user ON accounts(user_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_account ON transactions(account_id);
+CREATE INDEX IF NOT EXISTS idx_transactions_transfer_to ON transactions(transfer_to_account_id);
 
 -- Row Level Security
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
 ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE budgets ENABLE ROW LEVEL SECURITY;
+ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
 
 -- Profiles policies
 DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
@@ -102,6 +125,16 @@ CREATE POLICY "Users can view own budgets" ON budgets FOR SELECT USING (auth.uid
 CREATE POLICY "Users can insert own budgets" ON budgets FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own budgets" ON budgets FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can delete own budgets" ON budgets FOR DELETE USING (auth.uid() = user_id);
+
+-- Accounts policies
+DROP POLICY IF EXISTS "Users can view own accounts" ON accounts;
+DROP POLICY IF EXISTS "Users can insert own accounts" ON accounts;
+DROP POLICY IF EXISTS "Users can update own accounts" ON accounts;
+DROP POLICY IF EXISTS "Users can delete own accounts" ON accounts;
+CREATE POLICY "Users can view own accounts" ON accounts FOR SELECT USING (auth.uid() = user_id);
+CREATE POLICY "Users can insert own accounts" ON accounts FOR INSERT WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can update own accounts" ON accounts FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
+CREATE POLICY "Users can delete own accounts" ON accounts FOR DELETE USING (auth.uid() = user_id);
 -- Auto-create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -125,6 +158,9 @@ BEGIN
     (NEW.id, 'Freelance', 'laptop', '#06b6d4', 'income'),
     (NEW.id, 'Investment', 'trending_up', '#3b82f6', 'income'),
     (NEW.id, 'Other Income', 'attach_money', '#64748b', 'income');
+
+  INSERT INTO public.accounts (user_id, name, bank_name, color, icon, account_type, opening_balance, is_default, sort_order)
+  VALUES (NEW.id, 'Main', 'General', '#6366f1', 'account_balance', 'bank', 0, true, 0);
 
   RETURN NEW;
 END;
@@ -220,6 +256,7 @@ BEGIN
   DELETE FROM transactions WHERE user_id = auth.uid();
   DELETE FROM budgets WHERE user_id = auth.uid();
   DELETE FROM categories WHERE user_id = auth.uid();
+  DELETE FROM accounts WHERE user_id = auth.uid();
 
   UPDATE profiles
   SET
