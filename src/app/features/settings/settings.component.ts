@@ -7,6 +7,7 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
+import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { TranslatePipe } from '@ngx-translate/core';
 import { ProfileService } from '../../core/services/profile.service';
 import { AuthService } from '../../core/services/auth.service';
@@ -25,6 +26,7 @@ import { resolveAvatarUrl } from '../../core/utils/profile.util';
 import { UserAvatarComponent } from '../../shared/components/user-avatar/user-avatar.component';
 import { AsyncPipe } from '@angular/common';
 import { environment } from '../../../environments/environment';
+import { ImportDialogComponent } from './import-dialog/import-dialog.component';
 
 @Component({
   selector: 'app-settings',
@@ -32,6 +34,7 @@ import { environment } from '../../../environments/environment';
   imports: [
     MatCardModule, MatIconModule, MatButtonModule,
     MatFormFieldModule, MatInputModule, MatSelectModule, MatSlideToggleModule,
+    MatDialogModule,
     FormsModule, AsyncPipe, UserAvatarComponent, TranslatePipe,
   ],
   templateUrl: './settings.component.html',
@@ -47,6 +50,7 @@ export class SettingsComponent implements OnInit {
   private confirmDialog = inject(ConfirmDialogService);
   private toast = inject(ToastService);
   private refresh = inject(DataRefreshService);
+  private dialog = inject(MatDialog);
 
   loading = signal(true);
   saving = signal(false);
@@ -175,6 +179,19 @@ export class SettingsComponent implements OnInit {
     }
   }
 
+  openImportDialog(): void {
+    const ref = this.dialog.open(ImportDialogComponent, {
+      width: '480px',
+      maxWidth: '95vw',
+    });
+    ref.afterClosed().subscribe(imported => {
+      if (imported) {
+        this.refresh.notify('transaction');
+        this.message.set(this.langService.instant('import.done'));
+      }
+    });
+  }
+
   async changePassword(email: string | undefined): Promise<void> {
     if (!email) return;
     this.message.set(null);
@@ -198,7 +215,7 @@ export class SettingsComponent implements OnInit {
       if (format === 'json') {
         this.downloadFile(JSON.stringify(transactions, null, 2), filename, 'application/json');
       } else {
-        const header = 'Date,Type,Category,Amount,Description\n';
+        const header = 'Date,Type,Category,Amount,Description,Account\n';
         const rows = transactions.map(tx =>
           [
             tx.transaction_date,
@@ -206,6 +223,7 @@ export class SettingsComponent implements OnInit {
             `"${tx.category?.name ?? ''}"`,
             tx.amount,
             `"${(tx.description ?? '').replace(/"/g, '""')}"`,
+            `"${tx.account?.name ?? ''}"`,
           ].join(',')
         ).join('\n');
         this.downloadFile(header + rows, filename, 'text/csv');

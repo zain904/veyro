@@ -1,0 +1,68 @@
+<div class="recurring-page">
+  <div class="veyro-page-header">
+    <div>
+      <nav class="breadcrumbs">
+        <span>{{ 'common.home' | translate }}</span>
+        <mat-icon>chevron_right</mat-icon>
+        <span class="current">{{ 'recurring.title' | translate }}</span>
+      </nav>
+      <h1>{{ 'recurring.title' | translate }}</h1>
+      <p class="subtitle">{{ 'recurring.subtitle' | translate }}</p>
+    </div>
+    <button mat-flat-button color="primary" (click)="openDialog()">
+      <mat-icon>add</mat-icon>
+      {{ 'recurring.add' | translate }}
+    </button>
+  </div>
+
+  @if (loading()) {
+    <div class="skeleton-list">
+      @for (i of [1,2,3]; track i) { <div class="skeleton-card"></div> }
+    </div>
+  } @else if (error()) {
+    <p class="banner-msg error">{{ error() }}</p>
+  } @else if (items().length === 0) {
+    <app-empty-state
+      icon="event_repeat"
+      [title]="'recurring.emptyTitle' | translate"
+      [message]="'recurring.emptyMessage' | translate"
+      [actionLabel]="'recurring.add' | translate"
+      (action)="openDialog()" />
+  } @else {
+    <div class="recurring-list">
+      @for (item of items(); track item.id) {
+        <mat-card class="recurring-card veyro-card" [class.inactive]="!item.is_active">
+          <div class="card-top">
+            <div class="icon-wrap" [class.income]="item.type === 'income'" [class.expense]="item.type === 'expense'">
+              <mat-icon>{{ item.type === 'income' ? 'south_west' : 'north_east' }}</mat-icon>
+            </div>
+            <div class="meta">
+              <strong>{{ item.description || item.category?.name || (item.type === 'income' ? ('common.income' | translate) : ('common.expense' | translate)) }}</strong>
+              <span class="hint">{{ frequencyLabel(item.frequency) }} · {{ 'recurring.nextDue' | translate }}: {{ item.next_due_date }}</span>
+            </div>
+            <span class="amount" [class.income]="item.type === 'income'">{{ item.amount | veyroCurrency }}</span>
+          </div>
+          <div class="card-actions">
+            <mat-chip-set>
+              <mat-chip>{{ item.account?.name ?? '—' }}</mat-chip>
+              @if (!item.is_active) {
+                <mat-chip>{{ 'recurring.paused' | translate }}</mat-chip>
+              }
+            </mat-chip-set>
+            <div class="buttons">
+              <button mat-icon-button (click)="toggleActive(item)" [attr.aria-label]="'recurring.toggle' | translate">
+                <mat-icon>{{ item.is_active ? 'pause' : 'play_arrow' }}</mat-icon>
+              </button>
+              <button mat-icon-button (click)="openDialog(item)" [attr.aria-label]="'common.edit' | translate">
+                <mat-icon>edit</mat-icon>
+              </button>
+              <button mat-icon-button color="warn" (click)="deleteItem(item)" [attr.aria-label]="'common.delete' | translate">
+                <mat-icon>delete</mat-icon>
+              </button>
+            </div>
+          </div>
+        </mat-card>
+      }
+    </div>
+  }
+</div>

@@ -1,0 +1,66 @@
+<h2 mat-dialog-title>{{ (data.recurring ? 'recurring.edit' : 'recurring.add') | translate }}</h2>
+<form [formGroup]="form" (ngSubmit)="save()">
+  <mat-dialog-content>
+    <mat-button-toggle-group formControlName="type" class="full-width">
+      <mat-button-toggle value="expense">{{ 'common.expense' | translate }}</mat-button-toggle>
+      <mat-button-toggle value="income">{{ 'common.income' | translate }}</mat-button-toggle>
+    </mat-button-toggle-group>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'dialogs.amount' | translate }}</mat-label>
+      <input matInput type="number" formControlName="amount" min="0.01" step="0.01">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'dialogs.category' | translate }}</mat-label>
+      <mat-select formControlName="category_id">
+        @for (cat of filteredCategories; track cat.id) {
+          <mat-option [value]="cat.id">{{ cat.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'accounts.account' | translate }}</mat-label>
+      <mat-select formControlName="account_id">
+        @for (acc of data.accounts; track acc.id) {
+          <mat-option [value]="acc.id">{{ acc.name }}</mat-option>
+        }
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'dialogs.description' | translate }}</mat-label>
+      <input matInput formControlName="description">
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'recurring.frequency' | translate }}</mat-label>
+      <mat-select formControlName="frequency">
+        <mat-option value="weekly">{{ 'recurring.weekly' | translate }}</mat-option>
+        <mat-option value="monthly">{{ 'recurring.monthly' | translate }}</mat-option>
+        <mat-option value="yearly">{{ 'recurring.yearly' | translate }}</mat-option>
+      </mat-select>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'recurring.startDate' | translate }}</mat-label>
+      <input matInput [matDatepicker]="startPicker" formControlName="start_date">
+      <mat-datepicker-toggle matIconSuffix [for]="startPicker"></mat-datepicker-toggle>
+      <mat-datepicker #startPicker></mat-datepicker>
+    </mat-form-field>
+
+    <mat-form-field appearance="outline" class="full-width">
+      <mat-label>{{ 'recurring.endDate' | translate }}</mat-label>
+      <input matInput [matDatepicker]="endPicker" formControlName="end_date">
+      <mat-datepicker-toggle matIconSuffix [for]="endPicker"></mat-datepicker-toggle>
+      <mat-datepicker #endPicker></mat-datepicker>
+      <mat-hint>{{ 'recurring.endDateHint' | translate }}</mat-hint>
+    </mat-form-field>
+  </mat-dialog-content>
+
+  <mat-dialog-actions align="end">
+    <button mat-button type="button" mat-dialog-close>{{ 'common.cancel' | translate }}</button>
+    <button mat-flat-button color="primary" type="submit" [disabled]="form.invalid">{{ 'common.save' | translate }}</button>
+  </mat-dialog-actions>
+</form>

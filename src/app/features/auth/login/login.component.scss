@@ -151,6 +151,40 @@
   color: var(--text-secondary);
 }
 
+.oauth-buttons {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 20px;
+}
+
+.oauth-btn {
+  width: 100%;
+  height: 44px;
+  border-radius: 10px !important;
+
+  mat-icon {
+    margin-inline-end: 8px;
+  }
+}
+
+.divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 20px;
+  color: var(--text-secondary);
+  font-size: 12px;
+
+  &::before,
+  &::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border-color);
+  }
+}
+
 .confirmation-state {
   text-align: center;
 

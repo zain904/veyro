@@ -4,6 +4,7 @@ import { MatCardModule } from '@angular/material/card';
 import { MatButtonModule } from '@angular/material/button';
 import { MatIconModule } from '@angular/material/icon';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
 import { Subscription } from 'rxjs';
 import { AccountService } from '../../core/services/account.service';
@@ -21,7 +22,7 @@ import { TransferDialogComponent } from './transfer-dialog/transfer-dialog.compo
   selector: 'app-accounts',
   standalone: true,
   imports: [
-    MatCardModule, MatButtonModule, MatIconModule, MatDialogModule, RouterLink,
+    MatCardModule, MatButtonModule, MatIconModule, MatDialogModule, MatSlideToggleModule, RouterLink,
     VeyroCurrencyPipe, EmptyStateComponent, TranslatePipe,
   ],
   templateUrl: './accounts.component.html',
@@ -42,6 +43,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
   error = signal<string | null>(null);
   accounts = signal<Account[]>([]);
   totalBalance = signal(0);
+  showArchived = signal(false);
 
   ngOnInit(): void {
     this.load();
@@ -60,7 +62,7 @@ export class AccountsComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.error.set(null);
     try {
-      const data = await this.accountService.getAccountsWithBalances();
+      const data = await this.accountService.getAccountsWithBalances(this.showArchived());
       this.accounts.set(data);
       this.totalBalance.set(data.reduce((s, a) => s + (a.balance ?? 0), 0));
     } catch (err) {
@@ -117,6 +119,24 @@ export class AccountsComponent implements OnInit, OnDestroy {
         this.toast.error('errors.saveFailed');
       }
     });
+  }
+
+  toggleShowArchived(checked: boolean): void {
+    this.showArchived.set(checked);
+    this.load();
+  }
+
+  async archiveAccount(acc: Account): Promise<void> {
+    if (acc.is_default) return;
+    try {
+      await this.accountService.updateAccount(acc.id, { is_archived: !acc.is_archived });
+      this.toast.success(acc.is_archived ? 'accounts.restored' : 'accounts.archived');
+      this.refresh.notify('account');
+      await this.load();
+    } catch (err) {
+      console.error(err);
+      this.toast.error('errors.saveFailed');
+    }
   }
 
   async deleteAccount(acc: Account): Promise<void> {

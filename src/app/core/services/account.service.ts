@@ -89,8 +89,8 @@ export class AccountService {
     return accounts.find(a => a.is_default) ?? accounts[0] ?? await this.ensureDefaultAccount();
   }
 
-  async getAccountsWithBalances(): Promise<Account[]> {
-    const accounts = await this.getAccounts();
+  async getAccountsWithBalances(includeArchived = false): Promise<Account[]> {
+    const accounts = await this.getAccounts(includeArchived);
     const { data: txns, error } = await this.supabase.client
       .from('transactions')
       .select('amount, type, account_id, transfer_to_account_id');

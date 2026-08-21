@@ -51,6 +51,7 @@
   </mat-sidenav>
 
   <mat-sidenav-content #mainContent>
+    <a class="skip-link" href="#main-content">{{ 'layout.skipToContent' | translate }}</a>
     <mat-toolbar class="toolbar">
       @if (isHandset) {
         <button mat-icon-button (click)="drawer.toggle()" [attr.aria-label]="'layout.openMenu' | translate">
@@ -103,7 +104,7 @@
       </mat-menu>
     </mat-toolbar>
 
-    <main class="content">
+    <main class="content" id="main-content">
       @if (!db.isReady()) {
         <div class="setup-banner">
           <mat-icon>database</mat-icon>
@@ -118,6 +119,7 @@
           </div>
         </div>
       }
+      <app-pwa-install-banner />
       <router-outlet />
       <app-footer />
     </main>

@@ -6,6 +6,7 @@
     "reports": "رپورٹس",
     "categories": "زمرے",
     "accounts": "اکاؤنٹس",
+    "recurring": "بار بار",
     "settings": "ترتیبات"
   },
   "common": {
@@ -377,5 +378,46 @@
   },
   "footer": {
     "builtBy": "تیار کردہ"
+  },
+  "import": {
+    "open": "CSV درآمد",
+    "title": "لین دین درآمد کریں",
+    "hint": "Date, Type, Category, Amount, Description اور Account والا CSV اپ لوڈ کریں۔",
+    "downloadTemplate": "سانچہ ڈاؤن لوڈ",
+    "chooseFile": "CSV فائل منتخب کریں",
+    "previewSummary": "{{valid}} قطاریں تیار · {{skipped}} چھوڑی گئیں",
+    "importBtn": "درآمد",
+    "success": "{{imported}} درآمد · {{skipped}} چھوڑی گئیں",
+    "done": "درآمد مکمل۔"
+  },
+  "recurring": {
+    "title": "بار بار",
+    "subtitle": "بل، تنخوah اور سبسکرپشنز",
+    "add": "بار بار شامل کریں",
+    "edit": "بار بار ترمیم",
+    "frequency": "تعدد",
+    "weekly": "ہفتہ وار",
+    "monthly": "ماہانہ",
+    "yearly": "سالانہ",
+    "startDate": "شروع کی تاریخ",
+    "endDate": "اختتام (اختیاری)",
+    "endDateHint": "خالی = بغیر اختتام",
+    "nextDue": "اگلی تاریخ",
+    "paused": "روکا ہوا",
+    "toggle": "روکیں یا جاری رکھیں",
+    "emptyTitle": "کoi بار بار نہیں",
+    "emptyMessage": "کرایہ، تنخوah یا سبسکرپشن شامل کریں۔",
+    "created": "بار بار شامل",
+    "updated": "بار بار اپ ڈیٹ",
+    "deleted": "بار بار حذف",
+    "deleteTitle": "بار بار حذف کریں؟",
+    "deleteMessage": "مستقبل کی خودکار لین دین بند ہو جائیں گی۔"
+  },
+  "pwa": {
+    "bannerLabel": "ایپ انسٹال",
+    "title": "Veyro انسٹال کریں",
+    "message": "ہوم اسکرین پر شامل کریں — تیز رسائی کے لیے۔",
+    "install": "انسٹال",
+    "notNow": "ابھی نہیں"
   }
 }

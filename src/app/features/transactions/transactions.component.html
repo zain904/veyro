@@ -164,6 +164,15 @@
           </mat-card>
         </div>
       }
+      @if (totalCount() > pageSize) {
+        <mat-paginator
+          [length]="totalCount()"
+          [pageIndex]="pageIndex"
+          [pageSize]="pageSize"
+          [pageSizeOptions]="[25, 50, 100]"
+          (page)="onPageChange($event)"
+          [attr.aria-label]="'transactions.pagination' | translate" />
+      }
     }
   }
 </div>

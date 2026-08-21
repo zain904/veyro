@@ -8,6 +8,8 @@ import { MatInputModule } from '@angular/material/input';
 import { MatSelectModule } from '@angular/material/select';
 import { MatDialog, MatDialogModule } from '@angular/material/dialog';
 import { MatChipsModule } from '@angular/material/chips';
+import { MatPaginatorModule, PageEvent } from '@angular/material/paginator';
+import { MatSlideToggleModule } from '@angular/material/slide-toggle';
 import { FormsModule } from '@angular/forms';
 import { Subscription } from 'rxjs';
 import { TranslatePipe, TranslateService } from '@ngx-translate/core';
@@ -31,7 +33,8 @@ import { MONTHS, yearOptions, monthLabel, formatShortDate } from '../../core/uti
   imports: [
     MatCardModule, MatButtonModule, MatIconModule,
     MatFormFieldModule, MatInputModule, MatSelectModule,
-    MatDialogModule, MatChipsModule, FormsModule, VeyroCurrencyPipe,
+    MatDialogModule, MatChipsModule, MatPaginatorModule, MatSlideToggleModule,
+    FormsModule, VeyroCurrencyPipe,
     EmptyStateComponent, TranslatePipe,
   ],
   templateUrl: './transactions.component.html',
@@ -58,6 +61,13 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   filterAccount = '';
   filterMonth = new Date().getMonth() + 1;
   filterYear = new Date().getFullYear();
+  pageIndex = 0;
+  pageSize = 25;
+  totalCount = signal(0);
+  monthIncome = signal(0);
+  monthExpenses = signal(0);
+  incomeCountTotal = signal(0);
+  expenseCountTotal = signal(0);
 
   months = MONTHS;
   years = yearOptions(5);
@@ -79,15 +89,11 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   }
 
   get totalIncome(): number {
-    return this.transactions()
-      .filter(t => t.type === 'income')
-      .reduce((s, t) => s + Number(t.amount), 0);
+    return this.monthIncome();
   }
 
   get totalExpenses(): number {
-    return this.transactions()
-      .filter(t => t.type === 'expense')
-      .reduce((s, t) => s + Number(t.amount), 0);
+    return this.monthExpenses();
   }
 
   get netBalance(): number {
@@ -95,15 +101,15 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   }
 
   get incomeCount(): number {
-    return this.transactions().filter(t => t.type === 'income').length;
+    return this.incomeCountTotal();
   }
 
   get expenseCount(): number {
-    return this.transactions().filter(t => t.type === 'expense').length;
+    return this.expenseCountTotal();
   }
 
   get transactionCount(): number {
-    return this.transactions().length;
+    return this.totalCount();
   }
 
   async ngOnInit(): Promise<void> {
@@ -144,15 +150,32 @@ export class TransactionsComponent implements OnInit, OnDestroy {
     this.loading.set(true);
     this.error.set(null);
     try {
-      const data = await this.transactionService.getTransactions({
+      const filters = {
         type: this.filterType || undefined,
         categoryId: this.filterCategory || undefined,
         accountId: this.filterAccount || undefined,
         search: this.searchQuery || undefined,
         month: this.filterMonth,
         year: this.filterYear,
-      });
-      this.transactions.set(data);
+      };
+
+      const [paged, stats, incomeCount, expenseCount] = await Promise.all([
+        this.transactionService.getTransactionsPaged({
+          ...filters,
+          limit: this.pageSize,
+          offset: this.pageIndex * this.pageSize,
+        }),
+        this.transactionService.getMonthlyStats(this.filterMonth, this.filterYear),
+        this.transactionService.countTransactions({ ...filters, type: 'income' }),
+        this.transactionService.countTransactions({ ...filters, type: 'expense' }),
+      ]);
+
+      this.transactions.set(paged.data);
+      this.totalCount.set(paged.total);
+      this.monthIncome.set(stats.income);
+      this.monthExpenses.set(stats.expenses);
+      this.incomeCountTotal.set(incomeCount);
+      this.expenseCountTotal.set(expenseCount);
     } catch (err) {
       console.error(err);
       this.error.set(this.lang.instant('errors.loadFailed'));
@@ -162,6 +185,13 @@ export class TransactionsComponent implements OnInit, OnDestroy {
   }
 
   onFilterChange(): void {
+    this.pageIndex = 0;
+    this.loadTransactions();
+  }
+
+  onPageChange(event: PageEvent): void {
+    this.pageIndex = event.pageIndex;
+    this.pageSize = event.pageSize;
     this.loadTransactions();
   }
 

@@ -265,3 +265,23 @@ mat-sidenav-content {
     }
   }
 }
+
+.skip-link {
+  position: absolute;
+  top: -48px;
+  left: 16px;
+  z-index: 1000;
+  padding: 10px 16px;
+  border-radius: var(--radius-sm);
+  background: var(--primary-color);
+  color: var(--btn-primary-text);
+  font-weight: 600;
+  text-decoration: none;
+  transition: top var(--transition-fast);
+
+  &:focus {
+    top: 12px;
+    outline: none;
+    box-shadow: var(--focus-ring);
+  }
+}

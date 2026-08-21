@@ -37,9 +37,11 @@ export class LoginComponent {
   private fb = inject(FormBuilder);
   private auth = inject(AuthService);
   langService = inject(LanguageService);
+  private lang = inject(LanguageService);
 
   isSignUp = signal(false);
   loading = signal(false);
+  oauthLoading = signal(false);
   resending = signal(false);
   error = signal<string | null>(null);
   successMessage = signal<string | null>(null);
@@ -94,7 +96,7 @@ export class LoginComponent {
   async sendPasswordReset(): Promise<void> {
     const email = this.form.value.email?.trim();
     if (!email) {
-      this.error.set('Enter your email address first.');
+      this.error.set(this.lang.instant('auth.enterEmailFirst'));
       return;
     }
 
@@ -105,10 +107,10 @@ export class LoginComponent {
     try {
       const result = await this.auth.requestPasswordReset(email);
       if (result.error) {
-        this.error.set(result.error);
+        this.error.set(this.translateError(result.error));
       } else {
         this.pendingEmail.set(email);
-        this.successMessage.set('Password reset link sent! Check your inbox and spam folder.');
+        this.successMessage.set(this.lang.instant('auth.resetLinkSent'));
       }
     } finally {
       this.loading.set(false);
@@ -130,7 +132,7 @@ export class LoginComponent {
         : await this.auth.signIn(email!, password!);
 
       if (result.error) {
-        this.error.set(result.error);
+        this.error.set(this.translateError(result.error));
         if (result.needsEmailConfirmation && result.email) {
           this.pendingEmail.set(result.email);
         }
@@ -158,12 +160,30 @@ export class LoginComponent {
     try {
       const result = await this.auth.resendConfirmationEmail(email);
       if (result.error) {
-        this.error.set(result.error);
+        this.error.set(this.translateError(result.error));
       } else {
-        this.successMessage.set('Verification email sent again. Please check your inbox.');
+        this.successMessage.set(this.lang.instant('auth.verificationResent'));
       }
     } finally {
       this.resending.set(false);
     }
+  }
+
+  async signInWithGoogle(): Promise<void> {
+    this.oauthLoading.set(true);
+    this.error.set(null);
+    try {
+      const result = await this.auth.signInWithGoogle();
+      if (result.error) {
+        this.error.set(this.translateError(result.error));
+      }
+    } finally {
+      this.oauthLoading.set(false);
+    }
+  }
+
+  private translateError(message: string): string {
+    const translated = this.lang.instant(message);
+    return translated !== message ? translated : message;
   }
 }

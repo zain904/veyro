@@ -53,6 +53,8 @@ import { VeyroLogoComponent } from '../veyro-logo/veyro-logo.component';
 import { QuickToolsDialogComponent, QuickToolsResult } from '../quick-tools/quick-tools-dialog.component';
 import { TransactionDialogComponent } from '../../../features/transactions/transaction-dialog/transaction-dialog.component';
 import { TransactionService } from '../../../core/services/transaction.service';
+import { RecurringService } from '../../../core/services/recurring.service';
+import { PwaInstallBannerComponent } from '../pwa-install-banner/pwa-install-banner.component';
 
 const SIDEBAR_COLLAPSED_KEY = 'veyro-sidebar-collapsed';
 
@@ -79,7 +81,7 @@ const MOBILE_BREAKPOINT = '(max-width: 767px)';
     MatIconModule, MatButtonModule, MatMenuModule, MatTooltipModule,
 
     MatDialogModule, AsyncPipe, TranslatePipe, Dir,
-    AppFooterComponent, UserAvatarComponent, VeyroLogoComponent,
+    AppFooterComponent, UserAvatarComponent, VeyroLogoComponent, PwaInstallBannerComponent,
   ],
 
   templateUrl: './layout.component.html',
@@ -109,6 +111,7 @@ export class LayoutComponent implements OnInit, OnDestroy, AfterViewInit {
   private dialog = inject(MatDialog);
 
   private transactionService = inject(TransactionService);
+  private recurringService = inject(RecurringService);
 
   readonly lang = inject(LanguageService);
 
@@ -145,6 +148,8 @@ export class LayoutComponent implements OnInit, OnDestroy, AfterViewInit {
     { labelKey: 'nav.dashboard', icon: 'dashboard', route: '/dashboard' },
 
     { labelKey: 'nav.transactions', icon: 'receipt_long', route: '/transactions' },
+
+    { labelKey: 'nav.recurring', icon: 'event_repeat', route: '/recurring' },
 
     { labelKey: 'nav.accounts', icon: 'account_balance', route: '/accounts' },
 
@@ -205,6 +210,11 @@ export class LayoutComponent implements OnInit, OnDestroy, AfterViewInit {
 
       await this.categoryService.initializeForCurrentUser();
       await this.accountService.initializeForCurrentUser();
+
+      const generated = await this.recurringService.processDueRecurring();
+      if (generated > 0) {
+        this.refresh.notify('transaction');
+      }
 
       await Promise.all([this.loadProfileView(), this.currencyService.loadCurrency()]);
       this.sub = this.refresh.refresh$.subscribe(reason => {

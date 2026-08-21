@@ -10,6 +10,9 @@
       <p class="subtitle">{{ 'accounts.subtitle' | translate }}</p>
     </div>
     <div class="header-actions">
+      <mat-slide-toggle [checked]="showArchived()" (change)="toggleShowArchived($event.checked)">
+        {{ 'accounts.showArchived' | translate }}
+      </mat-slide-toggle>
       <button mat-stroked-button type="button" (click)="openTransferDialog()">
         <mat-icon>swap_horiz</mat-icon>
         {{ 'accounts.transfer' | translate }}
@@ -40,7 +43,7 @@
 
     <div class="accounts-grid">
       @for (acc of accounts(); track acc.id) {
-        <mat-card class="account-card veyro-card" [style.--acc-color]="acc.color">
+        <mat-card class="account-card veyro-card" [class.archived]="acc.is_archived" [style.--acc-color]="acc.color">
           <div class="acc-top">
             <div class="acc-icon" [style.background]="acc.color + '22'" [style.color]="acc.color">
               <mat-icon>{{ acc.icon || 'account_balance' }}</mat-icon>
@@ -53,6 +56,9 @@
                 <mat-icon>edit</mat-icon>
               </button>
               @if (!acc.is_default) {
+                <button mat-icon-button type="button" (click)="archiveAccount(acc)" [attr.aria-label]="'accounts.archive' | translate">
+                  <mat-icon>{{ acc.is_archived ? 'unarchive' : 'inventory_2' }}</mat-icon>
+                </button>
                 <button mat-icon-button type="button" color="warn" (click)="deleteAccount(acc)" [attr.aria-label]="'common.delete' | translate">
                   <mat-icon>delete</mat-icon>
                 </button>

@@ -6,6 +6,7 @@
     "reports": "التقارير",
     "categories": "الفئات",
     "accounts": "الحسابات",
+    "recurring": "متكرر",
     "settings": "الإعدادات"
   },
   "common": {
@@ -377,5 +378,46 @@
   },
   "footer": {
     "builtBy": "بُني بواسطة"
+  },
+  "import": {
+    "open": "استيراد CSV",
+    "title": "استيراد المعاملات",
+    "hint": "ارفع ملف CSV يحتوي Date, Type, Category, Amount, Description وAccount اختياري.",
+    "downloadTemplate": "تنزيل القالب",
+    "chooseFile": "اختر ملف CSV",
+    "previewSummary": "{{valid}} صفوف جاهزة · {{skipped}} تم تخطيها",
+    "importBtn": "استيراد",
+    "success": "تم استيراد {{imported}} ({{skipped}} تم تخطيها)",
+    "done": "اكتمل الاستيراد."
+  },
+  "recurring": {
+    "title": "متكرر",
+    "subtitle": "الفواتير والراتب والاشتراكات تلقائياً",
+    "add": "إضافة متكرر",
+    "edit": "تعديل متكرر",
+    "frequency": "التكرار",
+    "weekly": "أسبوعي",
+    "monthly": "شهري",
+    "yearly": "سنوي",
+    "startDate": "تاريخ البداية",
+    "endDate": "تاريخ النهاية (اختياري)",
+    "endDateHint": "اتركه فارغاً بدون نهاية",
+    "nextDue": "الاستحقاق التالي",
+    "paused": "موقوف",
+    "toggle": "إيقاف أو استئناف",
+    "emptyTitle": "لا عناصر متكررة",
+    "emptyMessage": "أضف الإيجار أو الراتب أو الاشتراكات.",
+    "created": "تم إنشاء العنصر المتكرر",
+    "updated": "تم تحديث العنصر المتكرر",
+    "deleted": "تم حذف العنصر المتكرر",
+    "deleteTitle": "حذف العنصر المتكرر؟",
+    "deleteMessage": "ستتوقف المعاملات التلقائية المستقبلية."
+  },
+  "pwa": {
+    "bannerLabel": "تثبيت التطبيق",
+    "title": "ثبّت Veyro",
+    "message": "أضفه إلى الشاشة الرئيسية للوصول السريع.",
+    "install": "تثبيت",
+    "notNow": "ليس الآن"
   }
 }

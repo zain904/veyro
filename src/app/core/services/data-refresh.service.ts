@@ -1,7 +1,7 @@
 import { Injectable } from '@angular/core';
 import { Subject } from 'rxjs';
 
-export type DataRefreshReason = 'transaction' | 'budget' | 'category' | 'profile' | 'account';
+export type DataRefreshReason = 'transaction' | 'budget' | 'category' | 'profile' | 'account' | 'recurring';
 
 @Injectable({ providedIn: 'root' })
 export class DataRefreshService {

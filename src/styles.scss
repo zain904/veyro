@@ -357,3 +357,36 @@ html[dir='rtl'] {
   padding: 32px;
   text-align: center;
 }
+
+// Premium UI polish — subtle motion & focus
+@keyframes veyro-fade-in {
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.content router-outlet + * {
+  animation: veyro-fade-in 0.28s ease-out;
+}
+
+.mat-mdc-card,
+.panel-card,
+.veyro-card {
+  transition: box-shadow var(--transition-normal), transform var(--transition-fast);
+}
+
+.mat-mdc-card:hover,
+.veyro-card:hover {
+  box-shadow: 0 8px 24px rgba(15, 23, 42, 0.08);
+}
+
+body.dark-theme .mat-mdc-card:hover,
+body.dark-theme .veyro-card:hover {
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.35);
+}
+
+button:focus-visible,
+a:focus-visible,
+.mat-mdc-button-base:focus-visible {
+  outline: none;
+  box-shadow: var(--focus-ring);
+}

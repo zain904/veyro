@@ -162,6 +162,15 @@
         <h2>{{ isSignUp() ? ('auth.createAccount' | translate) : ('auth.welcomeBack' | translate) }}</h2>
         <p class="subtitle">{{ isSignUp() ? ('auth.signUpSubtitle' | translate) : ('auth.signInSubtitle' | translate) }}</p>
 
+        <div class="oauth-buttons">
+          <button mat-stroked-button type="button" class="oauth-btn google" (click)="signInWithGoogle()" [disabled]="oauthLoading()">
+            <mat-icon>login</mat-icon>
+            {{ 'auth.continueGoogle' | translate }}
+          </button>
+        </div>
+
+        <div class="divider"><span>{{ 'auth.orEmail' | translate }}</span></div>
+
         <form [formGroup]="form" (ngSubmit)="onSubmit()">
           @if (isSignUp()) {
             <mat-form-field appearance="outline" class="full-width">

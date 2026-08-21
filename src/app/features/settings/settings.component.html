@@ -122,6 +122,10 @@
             <mat-icon>lock_reset</mat-icon>
             {{ 'settings.changePassword' | translate }}
           </button>
+          <button mat-stroked-button (click)="openImportDialog()">
+            <mat-icon>upload</mat-icon>
+            {{ 'import.open' | translate }}
+          </button>
           <button mat-stroked-button (click)="exportData('csv')" [disabled]="exporting()">
             <mat-icon>download</mat-icon>
             {{ 'settings.exportCsv' | translate }}

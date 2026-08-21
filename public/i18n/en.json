@@ -6,6 +6,7 @@
     "reports": "Reports",
     "categories": "Categories",
     "accounts": "Accounts",
+    "recurring": "Recurring",
     "settings": "Settings"
   },
   "common": {
@@ -49,6 +50,7 @@
     "toggleTheme": "Toggle theme",
     "userMenu": "User menu",
     "signOut": "Sign out",
+    "skipToContent": "Skip to content",
     "dbSetupTitle": "Database setup required",
     "dbSetupStep1": "1. Go to Supabase SQL Editor",
     "dbSetupStep2": "2. Copy all content from supabase/schema.sql in your project",
@@ -87,7 +89,13 @@
     "noAccount": "Don't have an account?",
     "signOutTitle": "Sign out?",
     "signOutMessage": "You will need to sign in again to access your account.",
-    "signOutConfirm": "Sign out"
+    "signOutConfirm": "Sign out",
+    "continueGoogle": "Continue with Google",
+    "orEmail": "or continue with email",
+    "emailNotConfirmed": "Please verify your email before signing in. Check your inbox for the confirmation link.",
+    "enterEmailFirst": "Enter your email address first.",
+    "resetLinkSent": "Password reset link sent! Check your inbox and spam folder.",
+    "verificationResent": "Verification email sent again. Please check your inbox."
   },
   "dashboard": {
     "greetingMorning": "Good morning",
@@ -205,7 +213,8 @@
     "emptyMessage": "No transactions match your filters for this period.",
     "deleteTitle": "Delete transaction?",
     "deleteMessage": "This cannot be undone.",
-    "deleteConfirm": "Delete"
+    "deleteConfirm": "Delete",
+    "pagination": "Transaction pages"
   },
   "budgets": {
     "title": "Budgets",
@@ -277,7 +286,11 @@
     "deleteTitle": "Delete account?",
     "deleteMessage": "This account will be removed. Transactions must be moved first.",
     "cannotDeleteDefault": "Cannot delete your default account",
-    "cannotDeleteHasTx": "Account has transactions — reassign or archive instead"
+    "cannotDeleteHasTx": "Account has transactions — reassign or archive instead",
+    "showArchived": "Show archived",
+    "archive": "Archive account",
+    "archived": "Account archived",
+    "restored": "Account restored"
   },
   "reports": {
     "title": "Reports",
@@ -377,5 +390,46 @@
   },
   "footer": {
     "builtBy": "Built by"
+  },
+  "import": {
+    "open": "Import CSV",
+    "title": "Import transactions",
+    "hint": "Upload a CSV file with Date, Type, Category, Amount, Description, and optional Account columns.",
+    "downloadTemplate": "Download template",
+    "chooseFile": "Choose CSV file",
+    "previewSummary": "{{valid}} rows ready · {{skipped}} skipped",
+    "importBtn": "Import",
+    "success": "Imported {{imported}} transactions ({{skipped}} skipped).",
+    "done": "Import complete."
+  },
+  "recurring": {
+    "title": "Recurring",
+    "subtitle": "Bills, salary, and subscriptions on autopilot",
+    "add": "Add recurring",
+    "edit": "Edit recurring",
+    "frequency": "Frequency",
+    "weekly": "Weekly",
+    "monthly": "Monthly",
+    "yearly": "Yearly",
+    "startDate": "Start date",
+    "endDate": "End date (optional)",
+    "endDateHint": "Leave empty for no end date",
+    "nextDue": "Next due",
+    "paused": "Paused",
+    "toggle": "Pause or resume",
+    "emptyTitle": "No recurring items",
+    "emptyMessage": "Add rent, salary, or subscriptions to auto-create transactions.",
+    "created": "Recurring item created",
+    "updated": "Recurring item updated",
+    "deleted": "Recurring item deleted",
+    "deleteTitle": "Delete recurring item?",
+    "deleteMessage": "Future automatic transactions will stop."
+  },
+  "pwa": {
+    "bannerLabel": "Install app",
+    "title": "Install Veyro",
+    "message": "Add to your home screen for quick access and an app-like experience.",
+    "install": "Install",
+    "notNow": "Not now"
   }
 }

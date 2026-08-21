@@ -20,6 +20,7 @@ export class SupabaseService {
         persistSession: true,
         autoRefreshToken: true,
         detectSessionInUrl: true,
+        flowType: 'pkce',
       },
     });
     this.initPromise = this.initAuth();
@@ -31,21 +32,117 @@ export class SupabaseService {
   }
 
   private async initAuth(): Promise<void> {
-    try {
-      const { data: { session }, error } = await this.supabase.auth.getSession();
-      if (error) {
-        console.error('Auth session restore failed', error);
-      }
+    this.supabase.auth.onAuthStateChange((event, session) => {
       this.currentUserSubject.next(session?.user ?? null);
+      if (event === 'SIGNED_IN' && this.hasOAuthCallbackInUrl()) {
+        this.stripAuthParamsFromUrl(new URL(window.location.href));
+      }
+    });
+
+    try {
+      if (this.hasOAuthCallbackInUrl()) {
+        await this.completeOAuthRedirect();
+      } else {
+        const { data: { session }, error } = await this.supabase.auth.getSession();
+        if (error && this.isInvalidSessionError(error)) {
+          await this.clearStaleSession();
+        } else {
+          this.currentUserSubject.next(session?.user ?? null);
+        }
+      }
     } catch (err) {
-      console.error('Auth init error', err);
+      if (this.isInvalidSessionError(err)) {
+        await this.clearStaleSession();
+      } else {
+        console.warn('Auth init error', err);
+        this.currentUserSubject.next(null);
+      }
     } finally {
       this.initializedSubject.next(true);
     }
+  }
 
-    this.supabase.auth.onAuthStateChange((_event, session) => {
-      this.currentUserSubject.next(session?.user ?? null);
+  private hasOAuthCallbackInUrl(): boolean {
+    if (typeof window === 'undefined') return false;
+    const url = new URL(window.location.href);
+    return url.searchParams.has('code')
+      || url.searchParams.has('error')
+      || url.hash.includes('access_token=');
+  }
+
+  /**
+   * Let Supabase (detectSessionInUrl) exchange the PKCE code via getSession().
+   * Do NOT call exchangeCodeForSession manually — that causes "Unable to exchange external code".
+   */
+  private async completeOAuthRedirect(): Promise<void> {
+    const url = new URL(window.location.href);
+    const oauthError = url.searchParams.get('error_description') ?? url.searchParams.get('error');
+    if (oauthError) {
+      console.warn('OAuth provider error', oauthError);
+      this.stripAuthParamsFromUrl(url);
+      return;
+    }
+
+    const { data: { session }, error } = await this.supabase.auth.getSession();
+
+    if (session?.user) {
+      this.currentUserSubject.next(session.user);
+      this.stripAuthParamsFromUrl(url);
+      return;
+    }
+
+    if (error) {
+      console.warn('OAuth redirect failed', error.message);
+      this.stripAuthParamsFromUrl(url);
+      return;
+    }
+
+    await new Promise<void>((resolve) => {
+      const timeout = setTimeout(() => resolve(), 8000);
+      const { data: { subscription } } = this.supabase.auth.onAuthStateChange((event, session) => {
+        if (session?.user && event === 'SIGNED_IN') {
+          clearTimeout(timeout);
+          subscription.unsubscribe();
+          this.currentUserSubject.next(session.user);
+          this.stripAuthParamsFromUrl(new URL(window.location.href));
+          resolve();
+        }
+      });
     });
+  }
+
+  private stripAuthParamsFromUrl(url: URL): void {
+    url.searchParams.delete('code');
+    url.searchParams.delete('error');
+    url.searchParams.delete('error_description');
+    url.searchParams.delete('state');
+    const cleanSearch = url.searchParams.toString();
+    const path = url.pathname + (cleanSearch ? `?${cleanSearch}` : '');
+    window.history.replaceState({}, document.title, path);
+  }
+
+  /** Old or revoked tokens in localStorage — clear and treat as signed out */
+  private isInvalidSessionError(error: unknown): boolean {
+    const message = this.authErrorMessage(error).toLowerCase();
+    return message.includes('refresh token')
+      || message.includes('invalid jwt')
+      || message.includes('session not found');
+  }
+
+  private authErrorMessage(error: unknown): string {
+    if (error && typeof error === 'object' && 'message' in error) {
+      return String((error as { message: string }).message);
+    }
+    return String(error ?? '');
+  }
+
+  private async clearStaleSession(): Promise<void> {
+    try {
+      await this.supabase.auth.signOut({ scope: 'local' });
+    } catch {
+      // Local wipe is best-effort
+    }
+    this.currentUserSubject.next(null);
   }
 
   get client(): SupabaseClient {
@@ -84,21 +181,26 @@ export class SupabaseService {
 
     if (error) {
       const message = error.message.toLowerCase().includes('email not confirmed')
-        ? 'Please verify your email before signing in. Check your inbox for the confirmation link.'
+        ? 'auth.emailNotConfirmed'
         : error.message;
       return { error: message };
     }
 
-    if (data.user && !data.user.email_confirmed_at) {
+    if (data.user && !data.user.email_confirmed_at && !this.isOAuthUser(data.user)) {
       await this.supabase.auth.signOut();
       return {
-        error: 'Please verify your email before signing in. Check your inbox for the confirmation link.',
+        error: 'auth.emailNotConfirmed',
         needsEmailConfirmation: true,
         email,
       };
     }
 
     return { error: null };
+  }
+
+  private isOAuthUser(user: User): boolean {
+    const provider = user.app_metadata?.['provider'];
+    return provider === 'google' || provider === 'apple';
   }
 
   async resendConfirmationEmail(email: string): Promise<AuthResult> {
@@ -110,10 +212,31 @@ export class SupabaseService {
   }
 
   getPasswordResetRedirectUrl(): string {
+    return this.getAppOrigin() + '/reset-password';
+  }
+
+  getAuthRedirectUrl(): string {
+    return this.getAppOrigin() + '/dashboard';
+  }
+
+  private getAppOrigin(): string {
     if (typeof window !== 'undefined' && window.location?.origin) {
-      return `${window.location.origin}/reset-password`;
+      return window.location.origin;
     }
-    return 'https://veyro-red.vercel.app/reset-password';
+    return 'https://veyro-red.vercel.app';
+  }
+
+  async signInWithOAuth(provider: 'google'): Promise<AuthResult> {
+    const { error } = await this.supabase.auth.signInWithOAuth({
+      provider,
+      options: {
+        redirectTo: this.getAuthRedirectUrl(),
+        queryParams: {
+          prompt: 'select_account',
+        },
+      },
+    });
+    return { error: error?.message ?? null };
   }
 
   async resetPasswordForEmail(email: string): Promise<AuthResult> {

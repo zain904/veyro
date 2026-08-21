@@ -18,6 +18,13 @@ export interface TransactionFilters {
   year?: number;
   startDate?: string;
   endDate?: string;
+  limit?: number;
+  offset?: number;
+}
+
+export interface PagedTransactions {
+  data: Transaction[];
+  total: number;
 }
 
 @Injectable({ providedIn: 'root' })
@@ -25,10 +32,41 @@ export class TransactionService {
   constructor(private supabase: SupabaseService) {}
 
   async getTransactions(filters?: TransactionFilters): Promise<Transaction[]> {
+    const { data } = await this.getTransactionsPaged(filters);
+    return data;
+  }
+
+  async countTransactions(filters?: Omit<TransactionFilters, 'limit' | 'offset'>): Promise<number> {
     let query = this.supabase.client
       .from('transactions')
-      .select(TX_SELECT)
+      .select('id', { count: 'exact', head: true });
+
+    query = this.applyFilters(query, filters);
+    const { count, error } = await query;
+    if (error) throw error;
+    return count ?? 0;
+  }
+
+  async getTransactionsPaged(filters?: TransactionFilters): Promise<PagedTransactions> {
+    let query = this.supabase.client
+      .from('transactions')
+      .select(TX_SELECT, { count: 'exact' })
       .order('transaction_date', { ascending: false });
+
+    query = this.applyFilters(query, filters);
+
+    if (filters?.limit != null) {
+      const from = filters.offset ?? 0;
+      query = query.range(from, from + filters.limit - 1);
+    }
+
+    const { data, error, count } = await query;
+    if (error) throw error;
+    return { data: (data ?? []) as Transaction[], total: count ?? 0 };
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private applyFilters(query: any, filters?: Omit<TransactionFilters, 'limit' | 'offset'>) {
 
     if (filters?.type) {
       query = query.eq('type', filters.type);
@@ -56,9 +94,7 @@ export class TransactionService {
       query = query.gte('transaction_date', startDate).lt('transaction_date', endDate);
     }
 
-    const { data, error } = await query;
-    if (error) throw error;
-    return (data ?? []) as Transaction[];
+    return query;
   }
 
   async getRecentTransactions(limit = 5, month?: number, year?: number): Promise<Transaction[]> {

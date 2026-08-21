@@ -72,6 +72,24 @@ CREATE TABLE IF NOT EXISTS budgets (
   UNIQUE(user_id, category_id, month, year)
 );
 
+-- Recurring transactions (bills, salary, subscriptions)
+CREATE TABLE IF NOT EXISTS recurring_transactions (
+  id UUID PRIMARY KEY DEFAULT uuid_generate_v4(),
+  user_id UUID NOT NULL REFERENCES auth.users(id) ON DELETE CASCADE,
+  category_id UUID REFERENCES categories(id) ON DELETE SET NULL,
+  account_id UUID REFERENCES accounts(id) ON DELETE SET NULL,
+  amount DECIMAL(12, 2) NOT NULL CHECK (amount > 0),
+  type TEXT NOT NULL CHECK (type IN ('income', 'expense')),
+  description TEXT,
+  frequency TEXT NOT NULL CHECK (frequency IN ('weekly', 'monthly', 'yearly')),
+  start_date DATE NOT NULL,
+  end_date DATE,
+  next_due_date DATE NOT NULL,
+  is_active BOOLEAN NOT NULL DEFAULT true,
+  created_at TIMESTAMPTZ DEFAULT NOW(),
+  updated_at TIMESTAMPTZ DEFAULT NOW()
+);
+
 -- Indexes
 CREATE INDEX IF NOT EXISTS idx_transactions_user_date ON transactions(user_id, transaction_date DESC);
 CREATE INDEX IF NOT EXISTS idx_transactions_user_type ON transactions(user_id, type);
@@ -80,6 +98,7 @@ CREATE INDEX IF NOT EXISTS idx_categories_user ON categories(user_id);
 CREATE INDEX IF NOT EXISTS idx_accounts_user ON accounts(user_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_account ON transactions(account_id);
 CREATE INDEX IF NOT EXISTS idx_transactions_transfer_to ON transactions(transfer_to_account_id);
+CREATE INDEX IF NOT EXISTS idx_recurring_user_active ON recurring_transactions(user_id, is_active, next_due_date);
 
 -- Row Level Security
 ALTER TABLE profiles ENABLE ROW LEVEL SECURITY;
@@ -87,6 +106,7 @@ ALTER TABLE categories ENABLE ROW LEVEL SECURITY;
 ALTER TABLE transactions ENABLE ROW LEVEL SECURITY;
 ALTER TABLE budgets ENABLE ROW LEVEL SECURITY;
 ALTER TABLE accounts ENABLE ROW LEVEL SECURITY;
+ALTER TABLE recurring_transactions ENABLE ROW LEVEL SECURITY;
 
 -- Profiles policies
 DROP POLICY IF EXISTS "Users can view own profile" ON profiles;
@@ -135,6 +155,13 @@ CREATE POLICY "Users can view own accounts" ON accounts FOR SELECT USING (auth.u
 CREATE POLICY "Users can insert own accounts" ON accounts FOR INSERT WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can update own accounts" ON accounts FOR UPDATE USING (auth.uid() = user_id) WITH CHECK (auth.uid() = user_id);
 CREATE POLICY "Users can delete own accounts" ON accounts FOR DELETE USING (auth.uid() = user_id);
+
+DROP POLICY IF EXISTS "Users manage own recurring" ON recurring_transactions;
+CREATE POLICY "Users manage own recurring"
+ON recurring_transactions FOR ALL
+USING (auth.uid() = user_id)
+WITH CHECK (auth.uid() = user_id);
+
 -- Auto-create profile on signup
 CREATE OR REPLACE FUNCTION public.handle_new_user()
 RETURNS TRIGGER AS $$
@@ -254,6 +281,7 @@ BEGIN
   END IF;
 
   DELETE FROM transactions WHERE user_id = auth.uid();
+  DELETE FROM recurring_transactions WHERE user_id = auth.uid();
   DELETE FROM budgets WHERE user_id = auth.uid();
   DELETE FROM categories WHERE user_id = auth.uid();
   DELETE FROM accounts WHERE user_id = auth.uid();

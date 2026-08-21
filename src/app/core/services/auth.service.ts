@@ -66,6 +66,10 @@ export class AuthService {
     return result;
   }
 
+  async signInWithGoogle(): Promise<AuthResult> {
+    return this.supabase.signInWithOAuth('google');
+  }
+
   async signOut(): Promise<void> {
     await this.supabase.signOut();
     this.router.navigate(['/login']);
